@@ -17,92 +17,78 @@ import PerfilScreen from './src/screens/Perfil';
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-function CustomHeader({ titulo, subtitulo }) {
-    return (
-        <View style={styles.header}>
-            <View>
-                <Text style={styles.headerTitle}>{titulo}</Text>
-                <Text style={styles.headerSubtitle}>{subtitulo}</Text>
-            </View>
-            <TouchableOpacity onPress={() => navigation.getParent()?.navigate('Perfil')}>
-                <Ionicons name="person-circle-outline" size={50} color="#326c00" />
-            </TouchableOpacity>
-        </View>
-    );
-}
-
 function TabRoutes() {
     return (
-        <Tab.Navigator
-            screenOptions={({ route }) => ({
-                header: ({ navigation }) => {
-                    let titulo = '';
-                    let subtitulo = 'Personalização para: Lavínia';
+        <Tab.Navigator initialRouteName="Home" screenOptions={({ route }) => ({
+            header: ({ navigation }) => {
+                let titulo = '';
+                let subtitulo = 'Personalização para: Lavínia';
 
-                    switch (route.name) {
-                        case 'Criancas':
-                            titulo = 'Crianças';
-                            break;
-                        case 'Relatorio':
-                            titulo = 'Relatório';
-                            break;
-                        case 'Home':
-                            titulo = 'Home';
-                            break;
-                        case 'Jornada':
-                            titulo = 'Jornada';
-                            break;
-                        case 'Recomendacoes':
-                            titulo = 'Recomendações';
-                            break;
-                    }
-                    return (
-                        <View style={styles.header}>
-                            <View>
-                                <Text style={styles.headerTitle}>{titulo}</Text>
-                                <Text style={styles.headerSubtitle}>{subtitulo}</Text>
-                            </View>
-                            <TouchableOpacity style={styles.botaoPerfil}>
-                                <Ionicons name="person-circle-outline" size={42} color="#326c00" />
-                            </TouchableOpacity>
+                switch (route.name) {
+                    case 'Criancas':
+                        titulo = 'Crianças';
+                        break;
+                    case 'Relatorio':
+                        titulo = 'Relatório';
+                        break;
+                    case 'Home':
+                        titulo = 'Home';
+                        break;
+                    case 'Jornada':
+                        titulo = 'Jornada';
+                        break;
+                    case 'Recomendacoes':
+                        titulo = 'Recomendações';
+                        break;
+                }
+
+                return (
+                    <View style={styles.header}>
+                        <View>
+                            <Text style={styles.headerTitle}>{titulo}</Text>
+                            <Text style={styles.headerSubtitle}>{subtitulo}</Text>
                         </View>
-                    );
-                },
-                tabBarShowLabel: false,
-                tabBarActiveTintColor: '#326c00',
-                tabBarInactiveTintColor: '#326c0090',
-                tabBarStyle: {
-                    backgroundColor: '#BFDE6C',
-                    height: 70,
-                    borderTopWidth: 1,
-                    borderTopColor: '#326c00',
-                    paddingBottom: 10,
-                    paddingTop: 10,
-                    marginBottom: 40,
-                },
-                tabBarIcon: ({ focused, color }) => {
-                    let iconName;
+                        <TouchableOpacity onPress={() => navigation.navigate('Perfil')}>
+                            <Ionicons name="person-circle-outline" size={42} color="#326c00" />
+                        </TouchableOpacity>
+                    </View>
+                );
+            },
+            tabBarShowLabel: false,
+            tabBarActiveTintColor: '#326c00',
+            tabBarInactiveTintColor: '#326c0090',
+            tabBarStyle: {
+                backgroundColor: '#BFDE6C',
+                height: 70,
+                borderTopWidth: 1,
+                borderTopColor: '#326c00',
+                paddingBottom: 10,
+                paddingTop: 10,
+                marginBottom: 40,
+            },
+            tabBarIcon: ({ color }) => {
+                let nomeIcone;
 
-                    switch (route.name) {
-                        case 'Criancas':
-                            iconName = 'baby';
-                            break;
-                        case 'Relatorio':
-                            iconName = 'chart-bar';
-                            break;
-                        case 'Home':
-                            iconName = 'home';
-                            break;
-                        case 'Jornada':
-                            iconName = 'shoe-prints';
-                            break;
-                        case 'Recomendacoes':
-                            iconName = 'plus-circle';
-                            break;
-                    }
-                    return <FontAwesome5 name={iconName} size={24} color={color} solid />;
-                },
-            })}>
+                switch (route.name) {
+                    case 'Criancas':
+                        nomeIcone = 'baby';
+                        break;
+                    case 'Relatorio':
+                        nomeIcone = 'chart-bar';
+                        break;
+                    case 'Home':
+                        nomeIcone = 'home';
+                        break;
+                    case 'Jornada':
+                        nomeIcone = 'shoe-prints';
+                        break;
+                    case 'Recomendacoes':
+                        nomeIcone = 'plus-circle';
+                        break;
+                }
+                return <FontAwesome5 name={nomeIcone} size={24} color={color} solid />;
+            },
+        })}>
             <Tab.Screen name="Criancas" component={CriancasScreen} />
             <Tab.Screen name="Relatorio" component={RelatorioScreen} />
             <Tab.Screen name="Home" component={HomeScreen} />

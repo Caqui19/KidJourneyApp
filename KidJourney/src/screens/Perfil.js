@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Text, Image, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 
 export default function PerfilScreen({ navigation }) {
     return (
         <ScrollView style={styles.scrollContainer}>
             <View style={styles.container}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: 'flex-start', marginBottom: 10, backgroundColor: '#BFDE6C60', width: 40, height: 40, borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                    <Ionicons name="arrow-back" size={24} color="#326c00" />
+                </TouchableOpacity>
                 <Text>Perfil</Text>
             </View>
         </ScrollView>
