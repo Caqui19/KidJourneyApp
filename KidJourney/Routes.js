@@ -13,6 +13,7 @@ import RelatorioScreen from './src/screens/Relatorio';
 import JornadaScreen from './src/screens/Jornada';
 import RecomendacoesScreen from './src/screens/Recomendacoes';
 import PerfilScreen from './src/screens/Perfil';
+import ConfiguracoesScreen from './src/screens/Configuracoes';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -106,6 +107,7 @@ export default function Routes() {
             <Stack.Screen name="Esqueceu" component={EsqueceuScreen} />
             <Stack.Screen name="Home" component={TabRoutes} />
             <Stack.Screen name="Perfil" component={PerfilScreen} />
+            <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
         </Stack.Navigator>
     );
 }

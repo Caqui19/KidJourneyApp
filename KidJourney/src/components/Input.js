@@ -26,7 +26,6 @@ export function Input({
                 keyboardType={keyboardType}
                 autoCapitalize={autoCapitalize}
             />
-
             {senha && (
                 <TouchableOpacity style={styles.visualizar} onPress={() => setMostrarSenha(!mostrarSenha)}>
                     <Ionicons name={mostrarSenha ? 'eye' : 'eye-off'} size={25} color="#326c00" />
