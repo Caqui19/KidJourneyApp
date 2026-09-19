@@ -7,25 +7,6 @@ import { BotaoSecundario } from '../components/Botaosecundario';
 
 export default function PerfilScreen({ navigation }) {
     const [nome, setNome] = useState('');
-    useEffect(() => {
-        const carregarDados = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-
-            if (user) {
-                const { data, error } = await supabase
-                    .from('responsaveis')
-                    .select('*')
-                    .eq('id_responsaveis', user.id)
-                    .single();
-
-                if (data) {
-                    setNome(data.nome_responsavel);
-                }
-            }
-        };
-
-        carregarDados();
-    }, []);
 
     return (
         <ScrollView style={styles.scrollContainer}>
@@ -63,6 +44,7 @@ export default function PerfilScreen({ navigation }) {
                         <Text style={styles.link}>Sair <FontAwesome5 name="sign-out-alt" size={15} color="#326c00" /></Text>
                     </TouchableOpacity>
                 </View>
+                <Text style={styles.texto2}>&copy; 2026 KidJourney</Text>
             </View>
         </ScrollView>
     );
@@ -115,7 +97,7 @@ const styles = StyleSheet.create({
     },
 
     fotoPerfil: {
-        borderRadius: '100%',
+        borderRadius: 100,
         width: 150,
         height: 150,
     },

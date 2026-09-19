@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Text, Image, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
+import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 
 export default function ConfiguracoesScreen({ navigation }) {
     return (
@@ -11,6 +12,7 @@ export default function ConfiguracoesScreen({ navigation }) {
                     </TouchableOpacity>
                     <Text style={styles.titulo}>Configurações</Text>
                 </View>
+                <Text style={styles.texto2}>&copy; 2026 KidJourney</Text>
             </View>
         </ScrollView>
     );
