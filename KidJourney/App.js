@@ -5,6 +5,7 @@ import { Nunito_400Regular, Nunito_700Bold } from '@expo-google-fonts/nunito';
 import { Poppins_400Regular, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
 import { View, ActivityIndicator } from 'react-native';
 import Routes from './Routes';
+import { AuthProvider } from './src/auth/AuthContext';
 
 export default function App() {
   const [fontsLoaded] = useFonts({
@@ -23,8 +24,10 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Routes />
-    </NavigationContainer>
+    <AuthProvider>
+      <NavigationContainer>
+        <Routes />
+      </NavigationContainer>
+    </AuthProvider>
   );
 }

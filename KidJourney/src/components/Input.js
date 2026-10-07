@@ -8,7 +8,12 @@ export function Input({
     placeholder,
     secureTextEntry = false,
     keyboardType = 'default',
-    autoCapitalize = 'sentences'
+    autoCapitalize = 'sentences',
+    autoComplete = 'off',
+    textContentType,
+    maxLength,
+    returnKeyType = 'done',
+    onSubmitEditing,
 }) {
     const [mostrarSenha, setMostrarSenha] = useState(false);
 
@@ -25,6 +30,12 @@ export function Input({
                 secureTextEntry={senha && !mostrarSenha}
                 keyboardType={keyboardType}
                 autoCapitalize={autoCapitalize}
+                autoCorrect={false}
+                autoComplete={autoComplete}
+                textContentType={textContentType}
+                maxLength={maxLength}
+                returnKeyType={returnKeyType}
+                onSubmitEditing={onSubmitEditing}
             />
             {senha && (
                 <TouchableOpacity style={styles.visualizar} onPress={() => setMostrarSenha(!mostrarSenha)}>

@@ -1,12 +1,32 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Text, Image, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
+import { View, ScrollView, Text, Image, Alert, StyleSheet } from 'react-native';
 import { BotaoPrincipal } from '../components/Botaoprincipal';
 import { BotaoSecundario } from '../components/Botaosecundario';
 import { Input } from '../components/Input';
+import { useAuth } from '../auth/AuthContext';
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { login, isLoading } = useAuth();
+
+    async function handleLogin() {
+        if (!email.trim() || !password) {
+            Alert.alert('Campos obrigatórios', 'Informe seu email e sua senha.');
+            return;
+        }
+
+        setIsSubmitting(true);
+
+        try {
+            await login(email.trim(), password);
+        } catch (error) {
+            Alert.alert('Não foi possível entrar', error.message || 'Tente novamente.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    }
 
     return (
         <ScrollView style={styles.scrollContainer}>
@@ -20,6 +40,9 @@ export default function LoginScreen({ navigation }) {
                         placeholder="Endereço de Email"
                         keyboardType="email-address"
                         autoCapitalize="none"
+                        autoComplete="email"
+                        textContentType="emailAddress"
+                        maxLength={254}
                         setTexto={setEmail}
                     />
                     <Input
@@ -28,16 +51,15 @@ export default function LoginScreen({ navigation }) {
                         placeholder="Senha"
                         secureTextEntry={true}
                         autoCapitalize="none"
+                        autoComplete="current-password"
+                        textContentType="password"
+                        maxLength={72}
                     />
-                    <TouchableOpacity onPress={() => navigation.navigate('Esqueceu')}>
-                        <Text style={styles.link}>Esqueceu a senha?</Text>
-                    </TouchableOpacity>
-                    <BotaoPrincipal texto="Entrar" onPress={() => navigation.navigate('Home')} />
-                    <Text style={styles.texto2}>ou</Text>
-                    <TouchableOpacity style={styles.botaoGoogle}>
-                        <Image source={require('../assets/google.png')} resizeMode="contain" style={styles.google} />
-                        <Text style={styles.textoGoogle}>Entre com Google Accounts</Text>
-                    </TouchableOpacity>
+                    <BotaoPrincipal
+                        texto={isSubmitting ? 'Entrando...' : 'Entrar'}
+                        disabled={isSubmitting || isLoading}
+                        onPress={handleLogin}
+                    />
                 </View>
                 <BotaoSecundario texto="Crie uma conta" style={{ marginTop: 80 }} onPress={() => navigation.navigate('Signup')} />
                 <Text style={[styles.texto2, { marginTop: 20 }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
@@ -90,13 +112,6 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
 
-    link: {
-        fontSize: 16,
-        color: '#326c00',
-        textAlign: 'left',
-        fontFamily: 'Poppins_400Regular',
-    },
-
     texto2: {
         fontSize: 14,
         color: '#636363',
@@ -104,27 +119,4 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_400Regular',
     },
 
-    botaoGoogle: {
-        padding: 15,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        backgroundColor: '#fff',
-        borderRadius: 12,
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-start',
-        gap: 20,
-    },
-
-    textoGoogle: {
-        fontSize: 16,
-        color: '#636363',
-        textAlign: 'left',
-        fontFamily: 'Poppins_400Regular',
-    },
-
-    google: {
-        width: 40,
-        height: 40,
-    },
 });

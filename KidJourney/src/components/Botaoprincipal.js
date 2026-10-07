@@ -1,9 +1,14 @@
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
 
-export function BotaoPrincipal({ texto, onPress }) {
+export function BotaoPrincipal({ texto, onPress, disabled = false }) {
     return (
-        <TouchableOpacity style={styles.botaoPrincipal} onPress={onPress}>
+        <TouchableOpacity
+            style={[styles.botaoPrincipal, disabled && styles.desabilitado]}
+            onPress={onPress}
+            disabled={disabled}
+            activeOpacity={0.8}
+        >
             <Text style={styles.texto}>{texto}</Text>
         </TouchableOpacity>
     );
@@ -27,5 +32,8 @@ const styles = StyleSheet.create({
         fontWeight: 600,
         textAlign: 'center',
         fontFamily: 'Poppins_600SemiBold',
+    },
+    desabilitado: {
+        opacity: 0.6,
     }
 });

@@ -2,11 +2,11 @@ import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ActivityIndicator, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useAuth } from './src/auth/AuthContext';
 
 import LoginScreen from './src/screens/Login';
 import SignupScreen from './src/screens/Signup';
-import EsqueceuScreen from './src/screens/Esqueceu';
 import HomeScreen from './src/screens/Home';
 import CriancasScreen from './src/screens/Criancas';
 import RelatorioScreen from './src/screens/Relatorio';
@@ -101,20 +101,39 @@ function TabRoutes() {
 }
 
 export default function Routes() {
-    return (
-        <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Login" component={LoginScreen} />
-            <Stack.Screen name="Signup" component={SignupScreen} />
-            <Stack.Screen name="Esqueceu" component={EsqueceuScreen} />
+    const { user, isLoading } = useAuth();
+
+    if (isLoading) {
+        return (
+            <View style={styles.loading}>
+                <ActivityIndicator size="large" color="#326c00" />
+            </View>
+        );
+    }
+
+    return user ? (
+        <Stack.Navigator key="authenticated" initialRouteName="Home" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Home" component={TabRoutes} />
             <Stack.Screen name="Perfil" component={PerfilScreen} />
             <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
             <Stack.Screen name="Cadastrocrianca" component={CadastrocriancaScreen} />
         </Stack.Navigator>
+    ) : (
+        <Stack.Navigator key="guest" initialRouteName="Login" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Login" component={LoginScreen} />
+            <Stack.Screen name="Signup" component={SignupScreen} />
+        </Stack.Navigator>
     );
 }
 
 const styles = StyleSheet.create({
+    loading: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+    },
+
     header: {
         backgroundColor: '#BFDE6C',
         paddingTop: 50,
