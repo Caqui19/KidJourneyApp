@@ -18,10 +18,10 @@ export default function SignupScreen({ navigation }) {
     const { register } = useAuth();
 
     async function handleRegister() {
-        if (nome.trim().length < 2 || !email.trim() || password.length < 12) {
+        if (nome.trim().length < 2 || !email.trim() || password.length < 8) {
             Alert.alert(
                 'Confira seus dados',
-                'Informe seu nome, um email válido e uma senha com pelo menos 12 caracteres.'
+                'Informe seu nome, um email válido e uma senha com pelo menos 8 caracteres.'
             );
             return;
         }
@@ -75,7 +75,7 @@ export default function SignupScreen({ navigation }) {
                     <Input
                         texto={password}
                         setTexto={setPassword}
-                        placeholder="Senha (mínimo de 12 caracteres)"
+                        placeholder="Senha (mínimo de 8 caracteres)"
                         secureTextEntry={true}
                         autoCapitalize="none"
                         autoComplete="new-password"

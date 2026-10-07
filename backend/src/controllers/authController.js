@@ -11,7 +11,7 @@ const {
 
 const BCRYPT_COST = 12;
 const MAX_PASSWORD_BYTES = 72;
-const MIN_PASSWORD_LENGTH = 12;
+const MIN_PASSWORD_LENGTH = 8;
 const dummyPasswordHash = bcrypt.hash(randomBytes(32).toString('hex'), BCRYPT_COST);
 
 function normalizedEmail(value) {
@@ -72,7 +72,7 @@ async function register(req, res) {
         aceite_termos !== true
     ) {
         return res.status(400).json({
-            message: 'Informe um nome e email válidos, uma senha de pelo menos 12 caracteres e aceite os termos.',
+            message: 'Informe um nome e email válidos, uma senha de pelo menos 8 caracteres e aceite os termos.',
         });
     }
 
