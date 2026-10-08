@@ -61,7 +61,7 @@ export default function LoginScreen({ navigation }) {
                         onPress={handleLogin}
                     />
                 </View>
-                <BotaoSecundario texto="Crie uma conta" style={{ marginTop: 80 }} onPress={() => navigation.navigate('Signup')} />
+                <BotaoSecundario texto="Crie uma conta" style={{ marginTop: 20 }} onPress={() => navigation.navigate('Signup')} />
                 <Text style={[styles.texto2, { marginTop: 20 }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
             </View>
         </ScrollView >
