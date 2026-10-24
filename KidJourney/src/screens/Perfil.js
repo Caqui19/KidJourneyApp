@@ -12,26 +12,9 @@ export default function PerfilScreen({ navigation }) {
         setIsSigningOut(true);
 
         try {
-            const result = await logout();
-            if (!result.serverRevoked || !result.localCleared) {
-                const warnings = [];
-                if (!result.localCleared) {
-                    warnings.push('O aparelho não confirmou a limpeza do token local.');
-                }
-                if (!result.serverRevoked) {
-                    warnings.push('O servidor não confirmou o encerramento; a sessão expira em até 30 dias.');
-                }
-
-                Alert.alert(
-                    'Você saiu deste aparelho',
-                    warnings.join(' ')
-                );
-            }
+            await logout();
         } catch {
-            Alert.alert(
-                'Sessão encerrada neste aparelho',
-                'Não foi possível confirmar a limpeza segura da sessão local. Entre novamente quando houver conexão.'
-            );
+            Alert.alert('Não foi possível sair', 'Confira sua conexão e tente novamente.');
         } finally {
             setIsSigningOut(false);
         }
@@ -48,7 +31,7 @@ export default function PerfilScreen({ navigation }) {
                 </View>
                 <Image source={require('../assets/perfil.png')} resizeMode="contain" style={styles.perfil} />
                 <View style={styles.accountDetails}>
-                    <Text style={styles.accountName}>{user?.nome}</Text>
+                    <Text style={styles.accountName}>{user?.displayName || user?.nome || 'Responsável'}</Text>
                     <Text style={styles.accountEmail}>{user?.email}</Text>
                 </View>
                 <BotaoSecundario texto='Acessar Configurações' onPress={() => navigation.navigate('Configuracoes')} />

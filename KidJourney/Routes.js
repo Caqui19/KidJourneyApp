@@ -1,12 +1,13 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
-import { ActivityIndicator, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Animated, Image, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAuth } from './src/auth/AuthContext';
 
 import LoginScreen from './src/screens/Login';
 import SignupScreen from './src/screens/Signup';
+import EsqueceuScreen from './src/screens/Esqueceu';
 import HomeScreen from './src/screens/Home';
 import CriancasScreen from './src/screens/Criancas';
 import RelatorioScreen from './src/screens/Relatorio';
@@ -18,6 +19,64 @@ import CadastrocriancaScreen from './src/screens/Cadastrocrianca';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+function SplashScreen() {
+    const ponto1 = useRef(new Animated.Value(0)).current;
+    const ponto2 = useRef(new Animated.Value(0)).current;
+    const ponto3 = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        const animacoes = [ponto1, ponto2, ponto3].map((ponto, index) => {
+            const animacao = Animated.loop(
+                Animated.sequence([
+                    Animated.delay(index * 150),
+                    Animated.timing(ponto, {
+                        toValue: 1,
+                        duration: 250,
+                        useNativeDriver: true,
+                    }),
+                    Animated.timing(ponto, {
+                        toValue: 0,
+                        duration: 250,
+                        useNativeDriver: true,
+                    }),
+                    Animated.delay((2 - index) * 150),
+                ])
+            );
+
+            animacao.start();
+            return animacao;
+        });
+
+        return () => animacoes.forEach((animacao) => animacao.stop());
+    }, [ponto1, ponto2, ponto3]);
+
+    const pontos = [ponto1, ponto2, ponto3];
+
+    return (
+        <View style={styles.splash}>
+            <Image source={require('./src/assets/logo.png')} resizeMode="contain" style={styles.splashLogo} />
+            <View style={styles.pontos}>
+                {pontos.map((ponto, index) => (
+                    <Animated.View
+                        key={index}
+                        style={[
+                            styles.ponto,
+                            {
+                                transform: [{
+                                    translateY: ponto.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [0, -9],
+                                    }),
+                                }],
+                            },
+                        ]}
+                    />
+                ))}
+            </View>
+        </View>
+    );
+}
 
 function TabRoutes() {
     return (
@@ -100,20 +159,22 @@ function TabRoutes() {
     );
 }
 
-export default function Routes() {
+export default function Routes({ fontsLoaded = true }) {
     const { user, isLoading } = useAuth();
+    const [splashConcluida, setSplashConcluida] = useState(false);
 
-    if (isLoading) {
-        return (
-            <View style={styles.loading}>
-                <ActivityIndicator size="large" color="#326c00" />
-            </View>
-        );
+    useEffect(() => {
+        const tempo = setTimeout(() => setSplashConcluida(true), 3000);
+        return () => clearTimeout(tempo);
+    }, []);
+
+    if (!fontsLoaded || isLoading || !splashConcluida) {
+        return <SplashScreen />;
     }
 
     return user ? (
-        <Stack.Navigator key="authenticated" initialRouteName="Home" screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="Home" component={TabRoutes} />
+        <Stack.Navigator key="authenticated" initialRouteName="Inicio" screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="Inicio" component={TabRoutes} />
             <Stack.Screen name="Perfil" component={PerfilScreen} />
             <Stack.Screen name="Configuracoes" component={ConfiguracoesScreen} />
             <Stack.Screen name="Cadastrocrianca" component={CadastrocriancaScreen} />
@@ -122,16 +183,36 @@ export default function Routes() {
         <Stack.Navigator key="guest" initialRouteName="Login" screenOptions={{ headerShown: false }}>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="Signup" component={SignupScreen} />
+            <Stack.Screen name="Esqueceu" component={EsqueceuScreen} />
         </Stack.Navigator>
     );
 }
 
 const styles = StyleSheet.create({
-    loading: {
+    splash: {
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#fff',
+    },
+
+    splashLogo: {
+        width: 230,
+        height: 100,
+        marginBottom: 18,
+    },
+
+    pontos: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 9,
+    },
+
+    ponto: {
+        width: 9,
+        height: 9,
+        borderRadius: 5,
+        backgroundColor: '#BFDE6C',
     },
 
     header: {

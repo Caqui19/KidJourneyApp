@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Text, Image, TouchableOpacity, Alert, StyleSheet } from 'react-native';
+import { View, ScrollView, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { BotaoPrincipal } from '../components/Botaoprincipal';
 import { BotaoSecundario } from '../components/Botaosecundario';
 import { Input } from '../components/Input';
 import Checkbox from 'expo-checkbox';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../auth/AuthContext';
+import { mensagemErro } from '../services/auth';
 
 export default function SignupScreen({ navigation }) {
     const [nome, setNome] = useState('');
@@ -15,28 +16,31 @@ export default function SignupScreen({ navigation }) {
     const [servico, setServico] = useState(false);
     const [politica, setPolitica] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [aviso, setAviso] = useState(null);
     const { register } = useAuth();
 
     async function handleRegister() {
         if (nome.trim().length < 2 || !email.trim() || password.length < 8) {
-            Alert.alert(
-                'Confira seus dados',
-                'Informe seu nome, um email válido e uma senha com pelo menos 8 caracteres.'
-            );
+            setAviso({ tipo: 'erro', texto: 'Informe seu nome, um email válido e uma senha com pelo menos 8 caracteres.' });
             return;
         }
 
         if (!uso || !servico || !politica) {
-            Alert.alert('Aceite necessário', 'Aceite os três itens para criar sua conta.');
+            setAviso({ tipo: 'erro', texto: 'Aceite os três itens para criar sua conta.' });
             return;
         }
 
+        setAviso(null);
         setIsSubmitting(true);
 
         try {
-            await register(nome.trim(), email.trim(), password, true);
+            await register(nome.trim(), email.trim(), password, {
+                termosUsoAceito: uso,
+                termosServicoAceito: servico,
+                politicaPrivacidadeAceita: politica,
+            });
         } catch (error) {
-            Alert.alert('Não foi possível cadastrar', error.message || 'Tente novamente.');
+            setAviso({ tipo: 'erro', texto: mensagemErro(error) });
         } finally {
             setIsSubmitting(false);
         }
@@ -100,6 +104,11 @@ export default function SignupScreen({ navigation }) {
                             <Text style={styles.checkboxLabel}>Aceito a Política de Privacidade</Text>
                         </TouchableOpacity>
                     </View>
+                    {aviso ? (
+                        <View style={[styles.feedback, aviso.tipo === 'erro' && styles.feedbackErro]}>
+                            <Text style={[styles.feedbackTexto, aviso.tipo === 'erro' && styles.feedbackErroTexto]}>{aviso.texto}</Text>
+                        </View>
+                    ) : null}
                     <BotaoPrincipal
                         texto={isSubmitting ? 'Cadastrando...' : 'Cadastrar'}
                         disabled={isSubmitting}
@@ -178,6 +187,29 @@ const styles = StyleSheet.create({
     },
 
     checkboxLabel: {
+        color: '#326c00',
+        fontSize: 14,
+        fontFamily: 'Poppins_400Regular',
+    },
+
+    feedback: {
+        backgroundColor: '#BFDE6C60',
+        borderColor: '#326c00',
+        borderWidth: 1,
+        borderRadius: 12,
+        padding: 12,
+    },
+
+    feedbackErro: {
+        backgroundColor: '#fff2e8',
+        borderColor: '#a64b00',
+    },
+
+    feedbackErroTexto: {
+        color: '#8a3b00',
+    },
+
+    feedbackTexto: {
         color: '#326c00',
         fontSize: 14,
         fontFamily: 'Poppins_400Regular',

@@ -1,28 +1,31 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Text, Image, Alert, StyleSheet } from 'react-native';
+import { View, ScrollView, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { BotaoPrincipal } from '../components/Botaoprincipal';
 import { BotaoSecundario } from '../components/Botaosecundario';
 import { Input } from '../components/Input';
 import { useAuth } from '../auth/AuthContext';
+import { mensagemErro } from '../services/auth';
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [mensagem, setMensagem] = useState(null);
     const { login, isLoading } = useAuth();
 
     async function handleLogin() {
         if (!email.trim() || !password) {
-            Alert.alert('Campos obrigatórios', 'Informe seu email e sua senha.');
+            setMensagem({ texto: 'Informe seu email e sua senha.' });
             return;
         }
 
+        setMensagem(null);
         setIsSubmitting(true);
 
         try {
             await login(email.trim(), password);
         } catch (error) {
-            Alert.alert('Não foi possível entrar', error.message || 'Tente novamente.');
+            setMensagem({ texto: mensagemErro(error) });
         } finally {
             setIsSubmitting(false);
         }
@@ -55,6 +58,14 @@ export default function LoginScreen({ navigation }) {
                         textContentType="password"
                         maxLength={72}
                     />
+                    <TouchableOpacity onPress={() => navigation.navigate('Esqueceu')}>
+                        <Text style={styles.link}>Esqueceu a senha?</Text>
+                    </TouchableOpacity>
+                    {mensagem ? (
+                        <View style={[styles.feedback, styles.feedbackErro]}>
+                            <Text style={[styles.feedbackTexto, styles.feedbackErroTexto]}>{mensagem.texto}</Text>
+                        </View>
+                    ) : null}
                     <BotaoPrincipal
                         texto={isSubmitting ? 'Entrando...' : 'Entrar'}
                         disabled={isSubmitting || isLoading}
@@ -117,6 +128,36 @@ const styles = StyleSheet.create({
         color: '#636363',
         textAlign: 'center',
         fontFamily: 'Poppins_400Regular',
+    },
+
+    link: {
+        color: '#326c00',
+        fontSize: 14,
+        textAlign: 'right',
+        fontFamily: 'Poppins_600SemiBold',
+    },
+
+    feedback: {
+        backgroundColor: '#BFDE6C60',
+        borderColor: '#326c00',
+        borderWidth: 1,
+        borderRadius: 12,
+        padding: 12,
+    },
+
+    feedbackErro: {
+        backgroundColor: '#fff2e8',
+        borderColor: '#a64b00',
+    },
+
+    feedbackTexto: {
+        color: '#326c00',
+        fontSize: 14,
+        fontFamily: 'Poppins_400Regular',
+    },
+
+    feedbackErroTexto: {
+        color: '#8a3b00',
     },
 
 });

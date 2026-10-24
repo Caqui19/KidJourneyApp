@@ -1,71 +1,59 @@
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import {
-    login as loginRequest,
-    logout as logoutRequest,
-    register as registerRequest,
-    restoreSession,
-    setSessionExpiredHandler,
-} from '../services/api';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
+import { auth } from '../config/firebase';
+import { cadastrar, entrar, recuperarSenha, sair } from '../services/auth';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const cadastroEmAndamento = useRef(false);
 
     useEffect(() => {
-        let isMounted = true;
-        const unsubscribe = setSessionExpiredHandler(() => {
-            if (isMounted) setUser(null);
+        return onAuthStateChanged(auth, (usuario) => {
+            if (!cadastroEmAndamento.current) {
+                setUser(usuario);
+                setIsLoading(false);
+            }
         });
+    }, []);
 
-        restoreSession()
-            .then((restoredUser) => {
-                if (isMounted) setUser(restoredUser);
-            })
-            .catch(() => {
-                if (isMounted) setUser(null);
-            })
-            .finally(() => {
-                if (isMounted) setIsLoading(false);
+    async function login(email, senha) {
+        const conta = await entrar(email, senha);
+        setUser(conta.user);
+        return conta.user;
+    }
+
+    async function register(nome, email, senha, aceites) {
+        cadastroEmAndamento.current = true;
+
+        try {
+            return await cadastrar(nome, email, senha, aceites, (usuario) => {
+                setUser(usuario);
+                cadastroEmAndamento.current = false;
             });
+        } finally {
+            cadastroEmAndamento.current = false;
+        }
+    }
 
-        return () => {
-            isMounted = false;
-            unsubscribe();
-        };
-    }, []);
+    async function resetPassword(email) {
+        return recuperarSenha(email);
+    }
 
-    const login = useCallback(async (email, senha) => {
-        const authenticatedUser = await loginRequest(email, senha);
-        setUser(authenticatedUser);
-        return authenticatedUser;
-    }, []);
-
-    const register = useCallback(async (nome, email, senha, aceite_termos) => {
-        const authenticatedUser = await registerRequest(nome, email, senha, aceite_termos);
-        setUser(authenticatedUser);
-        return authenticatedUser;
-    }, []);
-
-    const logout = useCallback(async () => {
+    async function logout() {
+        await sair();
         setUser(null);
-        return logoutRequest();
-    }, []);
+    }
 
-    const value = useMemo(() => ({
-        user,
-        isLoading,
-        login,
-        register,
-        logout,
-    }), [user, isLoading, login, register, logout]);
-
-    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+    return (
+        <AuthContext.Provider value={{ user, isLoading, login, register, resetPassword, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
 }
 
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (!context) throw new Error('useAuth precisa estar dentro de AuthProvider.');
-    return context;
+    return useContext(AuthContext);
 }

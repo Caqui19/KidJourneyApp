@@ -3,30 +3,21 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Nunito_400Regular, Nunito_700Bold } from '@expo-google-fonts/nunito';
 import { Poppins_400Regular, Poppins_600SemiBold } from '@expo-google-fonts/poppins';
-import { View, ActivityIndicator } from 'react-native';
 import Routes from './Routes';
 import { AuthProvider } from './src/auth/AuthContext';
 
 export default function App() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     Nunito_400Regular,
     Nunito_700Bold,
     Poppins_400Regular,
     Poppins_600SemiBold,
   });
   
-  if (!fontsLoaded) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </View>
-    );
-  }
-
   return (
     <AuthProvider>
       <NavigationContainer>
-        <Routes />
+        <Routes fontsLoaded={fontsLoaded || Boolean(fontError)} />
       </NavigationContainer>
     </AuthProvider>
   );
