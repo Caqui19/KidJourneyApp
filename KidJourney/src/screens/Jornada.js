@@ -37,7 +37,8 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 40,
+        paddingTop: 40,
+        paddingBottom: 20,
         paddingHorizontal: 20,
         backgroundColor: '#fff',
     },
@@ -80,6 +81,7 @@ const styles = StyleSheet.create({
         color: '#636363',
         textAlign: 'center',
         fontFamily: 'Poppins_400Regular',
+        marginTop: 10,
     },
 
     card: {

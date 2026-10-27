@@ -2,13 +2,16 @@ import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Modal } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
 
-export function Crianca({ nome, sexo, idade, especificidade }) {
+export function Crianca({ nome, sexo, idade, dataNascimento, especificidades = [], selecionada = false, onManage, onSelect }) {
     const [modalVisible, setModalVisible] = useState(false);
     return (
         <View>
-            <TouchableOpacity style={styles.card} onPress={() => setModalVisible(true)}>
+            <TouchableOpacity
+                style={[styles.card, selecionada && styles.cardSelecionado]}
+                onPress={() => setModalVisible(true)}
+            >
                 <FontAwesome5 style={styles.icone} name="baby" size={50} color="#326c00" solid />
-                <View>
+                <View style={styles.informacoes}>
                     <Text style={styles.titulo} numberOfLines={1}
                         ellipsizeMode="tail">{nome}</Text>
                     <Text style={styles.textoCard} numberOfLines={1}
@@ -16,7 +19,10 @@ export function Crianca({ nome, sexo, idade, especificidade }) {
                     <Text style={styles.textoCard} numberOfLines={1}
                         ellipsizeMode="tail">Idade: {idade}</Text>
                     <Text style={styles.textoCard} numberOfLines={1}
-                        ellipsizeMode="tail">Especificidades: {especificidade}</Text>
+                        ellipsizeMode="tail">Nascimento: {dataNascimento}</Text>
+                    <Text style={styles.textoCard} numberOfLines={1} ellipsizeMode="tail">
+                        Especificidades: {especificidades.join(', ') || 'Nenhuma'}
+                    </Text>
                 </View>
             </TouchableOpacity>
             <Modal transparent={true} visible={modalVisible} onRequestClose={() => setModalVisible(false)}>
@@ -29,11 +35,23 @@ export function Crianca({ nome, sexo, idade, especificidade }) {
                             </TouchableOpacity>
                         </View>
                         <View style={{ flexDirection: 'row', gap: 10, alignSelf: 'center', width: '100%', }}>
-                            <TouchableOpacity style={styles.botaoModal1}>
+                            <TouchableOpacity
+                                style={styles.botaoModal1}
+                                onPress={() => {
+                                    setModalVisible(false);
+                                    onManage();
+                                }}
+                            >
                                 <Text style={styles.modalTexto}>Gerenciar</Text>
                             </TouchableOpacity>
-                            <TouchableOpacity style={styles.botaoModal2}>
-                                <Text style={styles.modalTexto}>Selecionar</Text>
+                            <TouchableOpacity
+                                style={styles.botaoModal2}
+                                onPress={() => {
+                                    setModalVisible(false);
+                                    onSelect();
+                                }}
+                            >
+                                <Text style={styles.modalTexto}>{selecionada ? 'Desselecionar' : 'Selecionar'}</Text>
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -61,13 +79,21 @@ const styles = StyleSheet.create({
         gap: 14,
     },
 
-    textoCard: {
+    cardSelecionado: {
+        borderColor: '#326c00',
+        borderWidth: 2,
+    },
+
+    informacoes: {
         flex: 1,
+    },
+
+    textoCard: {
         fontSize: 15,
         color: '#636363',
         fontFamily: 'Poppins_400Regular',
         lineHeight: 22,
-        maxWidth: '90%',
+        maxWidth: '100%',
     },
 
     overlay: {

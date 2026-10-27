@@ -6,19 +6,55 @@ import {
     signOut,
     updateProfile,
 } from 'firebase/auth';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore';
 import { auth, db } from '../config/firebase';
 
-export async function cadastrar(nome, email, senha, aceites, aoCriarConta) {
+export async function validarPerfil(usuario) {
+    const referenciaPerfil = doc(db, 'usuarios', usuario.uid);
+    const perfilSalvo = await getDoc(referenciaPerfil);
+
+    if (!perfilSalvo.exists()) {
+        const error = new Error('Não encontramos os dados dessa conta.');
+        error.code = 'auth/profile-not-found';
+        throw error;
+    }
+
+    const dados = perfilSalvo.data();
+
+    if (!dados.perfil) {
+        await setDoc(referenciaPerfil, {
+            nome: usuario.displayName || dados.nome || '',
+            email: usuario.email,
+            perfil: 'cliente',
+            aprovado: false,
+        }, { merge: true });
+        return usuario;
+    }
+
+    if (dados.perfil === 'cliente' && dados.aprovado !== false) {
+        await setDoc(referenciaPerfil, { aprovado: false }, { merge: true });
+        return usuario;
+    }
+
+    if (dados.perfil !== 'cliente') {
+        const error = new Error('Esta conta não tem acesso a este aplicativo.');
+        error.code = 'auth/role-not-allowed';
+        throw error;
+    }
+
+    return usuario;
+}
+
+export async function cadastrar(nome, email, senha, politicaSegurancaAceita, aoCriarConta) {
     if (senha.length < 8) {
         const error = new Error('A senha precisa ter pelo menos 8 caracteres.');
         error.code = 'auth/weak-password';
         throw error;
     }
 
-    if (!aceites.termosUsoAceito || !aceites.termosServicoAceito || !aceites.politicaPrivacidadeAceita) {
-        const error = new Error('Aceite os termos e a política para criar sua conta.');
-        error.code = 'terms/not-accepted';
+    if (politicaSegurancaAceita !== true) {
+        const error = new Error('Leia e aceite a Política de Segurança para criar sua conta.');
+        error.code = 'policy/not-accepted';
         throw error;
     }
 
@@ -26,18 +62,18 @@ export async function cadastrar(nome, email, senha, aceites, aoCriarConta) {
 
     try {
         await updateProfile(conta.user, { displayName: nome.trim() });
-        aoCriarConta(conta.user);
         await setDoc(doc(db, 'usuarios', conta.user.uid), {
             nome: nome.trim(),
             email: conta.user.email,
-            termosUsoAceito: true,
-            termosServicoAceito: true,
-            politicaPrivacidadeAceita: true,
+            perfil: 'cliente',
+            aprovado: false,
+            politicaSegurancaAceita: true,
             aceitoEm: serverTimestamp(),
         });
+        aoCriarConta(conta.user);
     } catch (error) {
-        await deleteUser(conta.user).catch(() => {});
-        await signOut(auth).catch(() => {});
+        await deleteUser(conta.user).catch(() => { });
+        await signOut(auth).catch(() => { });
         throw error;
     }
 
@@ -45,7 +81,15 @@ export async function cadastrar(nome, email, senha, aceites, aoCriarConta) {
 }
 
 export async function entrar(email, senha) {
-    return signInWithEmailAndPassword(auth, email.trim(), senha);
+    const conta = await signInWithEmailAndPassword(auth, email.trim(), senha);
+
+    try {
+        await validarPerfil(conta.user);
+        return conta;
+    } catch (error) {
+        await signOut(auth).catch(() => { });
+        throw error;
+    }
 }
 
 export async function recuperarSenha(email) {
@@ -63,14 +107,11 @@ export function mensagemErro(error) {
         'auth/weak-password': 'A senha precisa ter pelo menos 8 caracteres.',
         'auth/invalid-credential': 'Email ou senha incorretos.',
         'auth/invalid-login-credentials': 'Email ou senha incorretos.',
-        'auth/user-not-found': 'Email ou senha incorretos.',
-        'auth/wrong-password': 'Email ou senha incorretos.',
-        'auth/too-many-requests': 'Muitas tentativas. Aguarde um pouco e tente de novo.',
-        'auth/network-request-failed': 'Confira sua conexão e tente novamente.',
-        'auth/operation-not-allowed': 'Ative email e senha nos métodos de login do Firebase.',
-        'terms/not-accepted': 'Aceite os termos e a política para criar sua conta.',
-        'permission-denied': 'Não foi possível salvar seus dados. Confira as regras do Firebase.',
-        'failed-precondition': 'Ative o Firestore no projeto Firebase antes de cadastrar.',
+        'auth/user-not-found': 'Usuário não encontrado.',
+        'auth/wrong-password': 'Senha incorreta.',
+        'auth/profile-not-found': 'Não encontramos os dados dessa conta. Entre em contato para recuperar o acesso.',
+        'auth/role-not-allowed': 'Esta conta não tem acesso a este aplicativo.',
+        'policy/not-accepted': 'Leia e aceite a Política de Segurança para criar sua conta.',
     };
 
     return mensagens[error.code] || 'Não foi possível concluir agora. Tente novamente.';

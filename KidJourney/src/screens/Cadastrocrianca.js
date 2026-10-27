@@ -1,13 +1,44 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Text, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
+import { View, ScrollView, Text, TouchableOpacity, TextInput, Alert, StyleSheet } from 'react-native';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Input } from '../components/Input';
 import { BotaoPrincipal } from '../components/Botaoprincipal';
 import { RadioButton } from 'react-native-paper';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import { Picker } from '@react-native-picker/picker';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useAuth } from '../auth/AuthContext';
+import { db } from '../config/firebase';
+
+const opcoesEspecificidades = [
+    'Alergia ao Leite de Vaca (APLV)',
+    'Alergia a Ovo',
+    'Alergia a Soja',
+    'Alergia a Trigo',
+    'Alergia a Amendoim / Castanhas',
+    'Alergia a Peixes / Frutos do Mar',
+    'Intolerância a Lactose',
+    'Intolerância a Frutose',
+    'Doença Celíaca (Restrição a Glúten)',
+    'Diabetes Infantil (Tipo 1)',
+    'Refluxo Gastroesofágico',
+    'Constipação Crônica',
+    'Prematuridade (Idade Corrigida)',
+    'Seletividade Alimentar Sensorial (TEA)',
+    'Dificuldade de Foco / Agitação (TDAH)',
+    'Dificuldade de Mastigação',
+    'Dificuldade de Deglutição (Disfagia)',
+    'Reflexo de Gag Sensível',
+    'Fase de Dentição (Nascimento de Dentes)',
+    'Neofobia Alimentar (Rejeição a Novos Alimentos)',
+    'Vegetarianismo',
+    'Veganismo',
+    'Dieta Sem Açúcar',
+    'Introdução Alimentar (Transição para Sólidos)',
+];
 
 export default function CadastrocriancaScreen({ navigation }) {
+    const { user } = useAuth();
     const [nome, setNome] = useState('');
     const [value, setValue] = useState('');
     const [dateText, setDateText] = useState('');
@@ -15,7 +46,9 @@ export default function CadastrocriancaScreen({ navigation }) {
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const showDatePicker = () => setDatePickerVisibility(true);
     const hideDatePicker = () => setDatePickerVisibility(false);
-    const [especificidade, setEspecificidade] = useState();
+    const [especificidade, setEspecificidade] = useState('');
+    const [especificidades, setEspecificidades] = useState([]);
+    const [salvando, setSalvando] = useState(false);
 
     const calcularIdadeExata = (dataNascimento) => {
         const hoje = new Date();
@@ -45,6 +78,12 @@ export default function CadastrocriancaScreen({ navigation }) {
         hideDatePicker();
     };
 
+    function adicionarEspecificidade() {
+        if (!especificidade || especificidades.includes(especificidade)) return;
+        setEspecificidades([...especificidades, especificidade]);
+        setEspecificidade('');
+    }
+
     const renderTextoIdade = () => {
         if (!idadeDetalhada) return null;
         const { anos, meses, dias } = idadeDetalhada;
@@ -56,6 +95,41 @@ export default function CadastrocriancaScreen({ navigation }) {
         if (partes.length === 2) return `${partes[0]} e ${partes[1]}`;
         return `${partes[0]}, ${partes[1]} e ${partes[2]}`;
     };
+
+    async function cadastrarCrianca() {
+        if (!nome.trim() || !value || !dateText) {
+            Alert.alert('Faltam informações', 'Preencha o nome, sexo e data de nascimento.');
+            return;
+        }
+
+        if (!user?.uid) {
+            Alert.alert('Não foi possível cadastrar', 'Entre na sua conta e tente novamente.');
+            return;
+        }
+
+        const listaEspecificidades = [...especificidades];
+        if (especificidade && !listaEspecificidades.includes(especificidade)) {
+            listaEspecificidades.push(especificidade);
+        }
+
+        setSalvando(true);
+
+        try {
+            await addDoc(collection(db, 'usuarios', user.uid, 'criancas'), {
+                nome: nome.trim(),
+                sexo: value === 'masculino' ? 'Masculino' : 'Feminino',
+                dataNascimento: dateText,
+                idade: renderTextoIdade(),
+                especificidades: listaEspecificidades,
+                criadoEm: serverTimestamp(),
+            });
+            navigation.goBack();
+        } catch {
+            Alert.alert('Não foi possível cadastrar', 'Confira o Firestore e tente novamente.');
+        } finally {
+            setSalvando(false);
+        }
+    }
 
     return (
         <ScrollView style={styles.scrollContainer}>
@@ -112,41 +186,26 @@ export default function CadastrocriancaScreen({ navigation }) {
                     </Text>
                 )}
                 <View style={styles.containerPicker}>
-                    <Picker selectedValue={especificidade} onValueChange={(itemValue) => setEspecificidade(itemValue)} style={styles.picker}>
+                    <Picker selectedValue={especificidade} onValueChange={setEspecificidade} style={styles.picker}>
                         <Picker.Item label="Selecione uma especificidade..." value="" enabled={false} />
-                        <Picker.Item label="Alergia ao Leite de Vaca (APLV)" value="aplv" />
-                        <Picker.Item label="Alergia a Ovo" value="alergia_ovo" />
-                        <Picker.Item label="Alergia a Soja" value="alergia_soja" />
-                        <Picker.Item label="Alergia a Trigo" value="alergia_trigo" />
-                        <Picker.Item label="Alergia a Amendoim / Castanhas" value="alergia_castanhas" />
-                        <Picker.Item label="Alergia a Peixes / Frutos do Mar" value="alergia_peixe" />
-                        <Picker.Item label="Intolerância a Lactose" value="intolerancia_lactose" />
-                        <Picker.Item label="Intolerância a Frutose" value="intolerancia_frutose" />
-                        <Picker.Item label="Doença Celíaca (Restrição a Glúten)" value="celiaca" />
-                        <Picker.Item label="Diabetes Infantil (Tipo 1)" value="diabetes" />
-                        <Picker.Item label="Refluxo Gastroesofágico" value="refluxo" />
-                        <Picker.Item label="Constipação Crônica" value="constipacao" />
-                        <Picker.Item label="Prematuridade (Idade Corrigida)" value="prematuridade" />
-                        <Picker.Item label="Seletividade Alimentar Sensorial (TEA)" value="tea" />
-                        <Picker.Item label="Dificuldade de Foco / Agitação (TDAH)" value="tdah" />
-                        <Picker.Item label="Dificuldade de Mastigação" value="dificuldade_mastigacao" />
-                        <Picker.Item label="Dificuldade de Deglutição (Disfagia)" value="disfagia" />
-                        <Picker.Item label="Reflexo de Gag Sensível" value="gag_sensivel" />
-                        <Picker.Item label="Fase de Dentição (Nascimento de Dentes)" value="denticao" />
-                        <Picker.Item label="Neofobia Alimentar (Rejeição a Novos Alimentos)" value="neofobia" />
-                        <Picker.Item label="Vegetarianismo" value="vegetarianismo" />
-                        <Picker.Item label="Veganismo" value="veganismo" />
-                        <Picker.Item label="Dieta Sem Açúcar" value="sem_acucar" />
-                        <Picker.Item label="Introdução Alimentar (Transição para Sólidos)" value="introducao_alimentar" />
+                        {opcoesEspecificidades.map((opcao) => (
+                            <Picker.Item key={opcao} label={opcao} value={opcao} />
+                        ))}
                     </Picker>
                 </View>
-                <TouchableOpacity style={styles.addBotao}>
+                <TouchableOpacity style={styles.addBotao} onPress={adicionarEspecificidade}>
                     <Text style={styles.addTexto}>Adicionar Especificidade +</Text>
                 </TouchableOpacity>
                 <View style={styles.especificidadesContainer}>
-                    <Text style={[styles.texto2, { textAlign: 'left', }]}>Você não adicionou nenhuma especificidade ainda.</Text>
+                    {especificidades.length === 0 ? (
+                        <Text style={[styles.texto2, { textAlign: 'left', }]}>Você não adicionou nenhuma especificidade ainda.</Text>
+                    ) : (
+                        especificidades.map((item) => (
+                            <Text key={item} style={[styles.texto2, { textAlign: 'left' }]}>{item}</Text>
+                        ))
+                    )}
                 </View>
-                <BotaoPrincipal texto='Cadastrar' />
+                <BotaoPrincipal texto={salvando ? 'Cadastrando...' : 'Cadastrar'} onPress={cadastrarCrianca} disabled={salvando} />
                 <Text style={styles.texto2}>&copy; 2026 KidJourney</Text>
             </View>
         </ScrollView >
@@ -158,7 +217,8 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 40,
+        paddingTop: 40,
+        paddingBottom: 20,
         paddingHorizontal: 20,
         backgroundColor: '#fff',
         gap: 20,

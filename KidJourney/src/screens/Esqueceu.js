@@ -64,7 +64,7 @@ export default function EsqueceuScreen({ navigation }) {
                     <BotaoPrincipal texto={isSubmitting ? 'Enviando...' : 'Enviar Redefinição'} disabled={isSubmitting} onPress={handleResetPassword} />
                     <Text style={styles.texto2}>ou</Text>
                     <BotaoSecundario texto="Entre na sua Conta" onPress={() => navigation.navigate('Login')} />
-                    <Text style={[styles.texto2, { marginTop: 20 }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
+                    <Text style={[styles.texto2, { marginTop: 10 }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
                 </View>
             </View>
         </ScrollView>
@@ -76,7 +76,8 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 40,
+        paddingTop: 40,
+        paddingBottom: 20,
         paddingHorizontal: 20,
         backgroundColor: '#fff',
     },

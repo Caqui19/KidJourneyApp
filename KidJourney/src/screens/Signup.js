@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, ScrollView, Text, Image, TouchableOpacity, StyleSheet, Linking } from 'react-native';
 import { BotaoPrincipal } from '../components/Botaoprincipal';
 import { BotaoSecundario } from '../components/Botaosecundario';
 import { Input } from '../components/Input';
@@ -12,12 +12,16 @@ export default function SignupScreen({ navigation }) {
     const [nome, setNome] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [uso, setUso] = useState(false);
-    const [servico, setServico] = useState(false);
     const [politica, setPolitica] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [aviso, setAviso] = useState(null);
     const { register } = useAuth();
+
+    function abrirPolitica() {
+        Linking.openURL('https://kidjourney-3cc97.web.app/politica-de-seguranca').catch(() => {
+            setAviso({ tipo: 'erro', texto: 'Não foi possível abrir a Política de Segurança agora.' });
+        });
+    }
 
     async function handleRegister() {
         if (nome.trim().length < 2 || !email.trim() || password.length < 8) {
@@ -25,8 +29,8 @@ export default function SignupScreen({ navigation }) {
             return;
         }
 
-        if (!uso || !servico || !politica) {
-            setAviso({ tipo: 'erro', texto: 'Aceite os três itens para criar sua conta.' });
+        if (!politica) {
+            setAviso({ tipo: 'erro', texto: 'Leia e aceite a Política de Segurança para criar sua conta.' });
             return;
         }
 
@@ -34,11 +38,7 @@ export default function SignupScreen({ navigation }) {
         setIsSubmitting(true);
 
         try {
-            await register(nome.trim(), email.trim(), password, {
-                termosUsoAceito: uso,
-                termosServicoAceito: servico,
-                politicaPrivacidadeAceita: politica,
-            });
+            await register(nome.trim(), email.trim(), password, politica);
         } catch (error) {
             setAviso({ tipo: 'erro', texto: mensagemErro(error) });
         } finally {
@@ -87,22 +87,13 @@ export default function SignupScreen({ navigation }) {
                         maxLength={72}
                     />
                     <View style={styles.checkboxContainer}>
-                        <Checkbox value={uso} onValueChange={setUso} color={uso ? '#326c00' : undefined} />
-                        <TouchableOpacity onPress={() => setUso((value) => !value)}>
-                            <Text style={styles.checkboxLabel}>Aceito os Termos de Uso</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.checkboxContainer}>
-                        <Checkbox value={servico} onValueChange={setServico} color={servico ? '#326c00' : undefined} />
-                        <TouchableOpacity onPress={() => setServico((value) => !value)}>
-                            <Text style={styles.checkboxLabel}>Aceito os Termos de Serviço</Text>
-                        </TouchableOpacity>
-                    </View>
-                    <View style={styles.checkboxContainer}>
                         <Checkbox value={politica} onValueChange={setPolitica} color={politica ? '#326c00' : undefined} />
-                        <TouchableOpacity onPress={() => setPolitica((value) => !value)}>
-                            <Text style={styles.checkboxLabel}>Aceito a Política de Privacidade</Text>
-                        </TouchableOpacity>
+                        <Text style={styles.checkboxLabel}>
+                            Li e aceito a{' '}
+                            <Text style={styles.link} onPress={abrirPolitica} accessibilityRole="link">
+                                Política de Segurança
+                            </Text>
+                        </Text>
                     </View>
                     {aviso ? (
                         <View style={[styles.feedback, aviso.tipo === 'erro' && styles.feedbackErro]}>
@@ -115,7 +106,7 @@ export default function SignupScreen({ navigation }) {
                         onPress={handleRegister}
                     />
                     <BotaoSecundario texto="Entre na sua Conta" onPress={() => navigation.navigate('Login')} />
-                    <Text style={[styles.texto2, { marginTop: 20 }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
+                    <Text style={[styles.texto2, { marginTop: 10 }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
                 </View>
             </View>
         </ScrollView>
@@ -127,7 +118,8 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: 'center',
         justifyContent: 'center',
-        paddingVertical: 40,
+        paddingTop: 40,
+        paddingBottom: 20,
         paddingHorizontal: 20,
         backgroundColor: '#fff',
     },
@@ -167,10 +159,8 @@ const styles = StyleSheet.create({
     },
 
     link: {
-        fontSize: 16,
         color: '#326c00',
-        textAlign: 'left',
-        fontFamily: 'Poppins_400Regular',
+        textDecorationLine: 'underline',
     },
 
     texto2: {
@@ -187,7 +177,7 @@ const styles = StyleSheet.create({
     },
 
     checkboxLabel: {
-        color: '#326c00',
+        color: '#636363',
         fontSize: 14,
         fontFamily: 'Poppins_400Regular',
     },

@@ -13,6 +13,7 @@ import CriancasScreen from './src/screens/Criancas';
 import RelatorioScreen from './src/screens/Relatorio';
 import JornadaScreen from './src/screens/Jornada';
 import RecomendacoesScreen from './src/screens/Recomendacoes';
+import AnotacoesScreen from './src/screens/Anotacoes';
 import PerfilScreen from './src/screens/Perfil';
 import ConfiguracoesScreen from './src/screens/Configuracoes';
 import CadastrocriancaScreen from './src/screens/Cadastrocrianca';
@@ -74,16 +75,22 @@ function SplashScreen() {
                     />
                 ))}
             </View>
+            <Text style={styles.splashCopyright}>&copy; 2026 KidJourney</Text>
         </View>
     );
 }
 
 function TabRoutes() {
+    const [criancaSelecionada, setCriancaSelecionada] = useState(null);
+
     return (
         <Tab.Navigator initialRouteName="Home" screenOptions={({ route }) => ({
             header: ({ navigation }) => {
                 let titulo = '';
-                let subtitulo = 'Personalização para: Lavínia';
+                let subtitulo = 'Personalização para:';
+                if (criancaSelecionada?.nome) {
+                    subtitulo += ` ${criancaSelecionada.nome}`;
+                }
 
                 switch (route.name) {
                     case 'Criancas':
@@ -101,13 +108,18 @@ function TabRoutes() {
                     case 'Recomendacoes':
                         titulo = 'Recomendações';
                         break;
+                    case 'Anotacoes':
+                        titulo = 'Anotações';
+                        break;
                 }
 
                 return (
                     <View style={styles.header}>
-                        <View>
+                        <View style={styles.headerInfo}>
                             <Text style={styles.headerTitle}>{titulo}</Text>
-                            <Text style={styles.headerSubtitle}>{subtitulo}</Text>
+                            <Text style={styles.headerSubtitle} numberOfLines={1} ellipsizeMode="tail">
+                                {subtitulo}
+                            </Text>
                         </View>
                         <TouchableOpacity onPress={() => navigation.navigate('Perfil')}>
                             <Ionicons name="person-circle-outline" size={42} color="#326c00" />
@@ -146,15 +158,27 @@ function TabRoutes() {
                     case 'Recomendacoes':
                         nomeIcone = 'plus-circle';
                         break;
+                    case 'Anotacoes':
+                        nomeIcone = 'sticky-note';
+                        break;
                 }
                 return <FontAwesome5 name={nomeIcone} size={24} color={color} solid />;
             },
         })}>
-            <Tab.Screen name="Criancas" component={CriancasScreen} />
+            <Tab.Screen name="Criancas">
+                {(props) => (
+                    <CriancasScreen
+                        {...props}
+                        criancaSelecionada={criancaSelecionada}
+                        aoSelecionarCrianca={setCriancaSelecionada}
+                    />
+                )}
+            </Tab.Screen>
             <Tab.Screen name="Relatorio" component={RelatorioScreen} />
             <Tab.Screen name="Home" component={HomeScreen} />
             <Tab.Screen name="Jornada" component={JornadaScreen} />
             <Tab.Screen name="Recomendacoes" component={RecomendacoesScreen} />
+            <Tab.Screen name="Anotacoes" component={AnotacoesScreen} />
         </Tab.Navigator>
     );
 }
@@ -215,6 +239,14 @@ const styles = StyleSheet.create({
         backgroundColor: '#BFDE6C',
     },
 
+    splashCopyright: {
+        position: 'absolute',
+        bottom: 20,
+        color: '#636363',
+        fontSize: 12,
+        fontFamily: 'Poppins_400Regular',
+    },
+
     header: {
         backgroundColor: '#BFDE6C',
         paddingTop: 50,
@@ -233,8 +265,15 @@ const styles = StyleSheet.create({
         color: '#326c00',
     },
 
+    headerInfo: {
+        flex: 1,
+        maxWidth: '80%',
+        minWidth: 0,
+        marginRight: 8,
+    },
+
     headerSubtitle: {
-        fontSize: 16,
+        fontSize: 14,
         fontFamily: 'Poppins_400Regular',
         color: '#326c00',
     }
