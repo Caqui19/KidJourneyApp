@@ -4,17 +4,16 @@
     "slug": "KidJourney",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./src/assets/appIcon.png",
     "userInterfaceStyle": "light",
     "ios": {
       "supportsTablet": true
     },
     "android": {
+      "package": "com.kidjourney.app",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundImage": "./assets/android-icon-background.png",
-        "monochromeImage": "./assets/android-icon-monochrome.png"
+        "backgroundColor": "#C7E56D",
+        "foregroundImage": "./src/assets/appIcon.png"
       }
     },
     "web": {
@@ -24,6 +23,11 @@
       "expo-font",
       "expo-secure-store",
       "expo-status-bar"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4fc83d79-ea3e-4935-9bd8-af8964065fcb"
+      }
+    }
   }
 }

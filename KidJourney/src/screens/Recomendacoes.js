@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, ScrollView, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { FontAwesome5, Ionicons } from '@expo/vector-icons';
+import { View, ScrollView, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function RecomendacoesScreen() {
     const [pesquisa, setPesquisa] = useState('');
@@ -42,10 +42,12 @@ export default function RecomendacoesScreen() {
                 </View>
             </View>
 
-            <View style={styles.imagemRecomendacao}>
-                <FontAwesome5 name="baby" size={82} color="#326c00" />
-                <Ionicons name="restaurant" size={74} color="#ed8746" />
-            </View>
+            <Image
+                source={require('../assets/recomendacaoAlimentacao.png')}
+                style={styles.imagemRecomendacao}
+                resizeMode="cover"
+                accessibilityLabel="Bebê sendo alimentado"
+            />
             <Text style={styles.legenda}>Dra. Barbara, Especialista em alimentação infantil.</Text>
             <Text style={styles.copyright}>&copy; 2026 KidJourney</Text>
         </ScrollView>
@@ -145,11 +147,6 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#ccc',
         borderRadius: 20,
-        backgroundColor: '#f7f5ed',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 22,
         marginTop: 6,
     },
 
