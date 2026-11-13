@@ -1,55 +1,57 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTema } from '../TemaContext';
 
 export default function RecomendacoesScreen() {
+    const { cores } = useTema();
     const [pesquisa, setPesquisa] = useState('');
     const textoRecomendacao = 'introduzir alimentos complementares mantendo o leite materno ou fórmula como principal fonte de nutrição oferecer frutas amassadas ou em pedaços adequados';
     const encontrou = pesquisa.trim() && textoRecomendacao.includes(pesquisa.trim().toLowerCase());
 
     return (
-        <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.container}>
-            <View style={styles.pesquisaContainer}>
-                <Ionicons name="search" size={24} color="#d0d0d0" />
+        <ScrollView style={[styles.scrollContainer, { backgroundColor: cores.fundo }]} contentContainerStyle={[styles.container, { backgroundColor: cores.fundo }]}>
+            <View style={[styles.pesquisaContainer, { borderColor: cores.borda, backgroundColor: cores.cartao }]}>
+                <Ionicons name="search" size={24} color={cores.textoSecundario} />
                 <TextInput
                     value={pesquisa}
                     onChangeText={setPesquisa}
                     placeholder="Pesquise aqui..."
-                    placeholderTextColor="#888"
-                    style={styles.campoPesquisa}
+                    placeholderTextColor={cores.textoSecundario}
+                    style={[styles.campoPesquisa, { color: cores.texto }]}
                 />
                 <TouchableOpacity onPress={() => setPesquisa('')} accessibilityLabel="Limpar pesquisa">
-                    <Ionicons name="close" size={25} color="#d0d0d0" />
+                    <Ionicons name="close" size={25} color={cores.textoSecundario} />
                 </TouchableOpacity>
             </View>
 
-            <Text style={styles.resultadoTitulo}>Resultados da pesquisa:</Text>
-            <Text style={styles.resultadoTexto}>
+            <Text style={[styles.resultadoTitulo, { color: cores.texto }]}>Resultados da pesquisa:</Text>
+            <Text style={[styles.resultadoTexto, { color: cores.textoSecundario }]}>
                 {encontrou ? '1 resultado encontrado.' : 'Nenhum resultado encontrado.'}
             </Text>
 
-            <Text style={styles.titulo}>Alimentação</Text>
-            <Text style={styles.subtitulo}>Intermediário | 7 meses | Nenhuma</Text>
+            <Text style={[styles.titulo, { color: cores.titulo }]}>Alimentação</Text>
+            <Text style={[styles.subtitulo, { color: cores.textoSecundario }]}>Intermediário | 7 meses | Nenhuma</Text>
 
             <View style={styles.lista}>
                 <View style={styles.itemLista}>
-                    <Text style={styles.ponto}>•</Text>
-                    <Text style={styles.texto}>Introduzir alimentos complementares mantendo o leite materno ou fórmula como principal fonte de nutrição.</Text>
+                    <Text style={[styles.ponto, { color: cores.textoSecundario }]}>•</Text>
+                    <Text style={[styles.texto, { color: cores.textoSecundario }]}>Introduzir alimentos complementares mantendo o leite materno ou fórmula como principal fonte de nutrição.</Text>
                 </View>
                 <View style={styles.itemLista}>
-                    <Text style={styles.ponto}>•</Text>
-                    <Text style={styles.texto}>Oferecer frutas amassadas ou em pedaços adequados.</Text>
+                    <Text style={[styles.ponto, { color: cores.textoSecundario }]}>•</Text>
+                    <Text style={[styles.texto, { color: cores.textoSecundario }]}>Oferecer frutas amassadas ou em pedaços adequados.</Text>
                 </View>
             </View>
 
             <Image
                 source={require('../assets/recomendacaoAlimentacao.png')}
-                style={styles.imagemRecomendacao}
+                style={[styles.imagemRecomendacao, { borderColor: cores.borda }]}
                 resizeMode="cover"
                 accessibilityLabel="Bebê sendo alimentado"
             />
-            <Text style={styles.legenda}>Dra. Barbara, Especialista em alimentação infantil.</Text>
-            <Text style={styles.copyright}>&copy; 2026 KidJourney</Text>
+            <Text style={[styles.legenda, { color: cores.textoSecundario }]}>Dra. Barbara, Especialista em alimentação infantil.</Text>
+            <Text style={[styles.copyright, { color: cores.textoSecundario }]}>&copy; 2026 KidJourney</Text>
         </ScrollView>
     );
 }

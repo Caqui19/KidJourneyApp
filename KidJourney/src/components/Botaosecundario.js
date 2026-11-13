@@ -1,10 +1,13 @@
 import React from 'react';
 import { Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useTema } from '../TemaContext';
 
 export function BotaoSecundario({ texto, onPress, style }) {
+    const { cores } = useTema();
+
     return (
-        <TouchableOpacity style={[styles.botaoSecundario, style]} onPress={onPress}>
-            <Text style={styles.texto}>{texto}</Text>
+        <TouchableOpacity style={[styles.botaoSecundario, { backgroundColor: cores.cartao, borderColor: cores.acento }, style]} onPress={onPress}>
+            <Text style={[styles.texto, { color: cores.acento }]}>{texto}</Text>
         </TouchableOpacity>
     );
 }

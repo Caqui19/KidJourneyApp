@@ -7,6 +7,7 @@ import Checkbox from 'expo-checkbox';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../auth/AuthContext';
 import { mensagemErro } from '../services/auth';
+import { useTema } from '../TemaContext';
 
 export default function SignupScreen({ navigation }) {
     const [nome, setNome] = useState('');
@@ -16,6 +17,7 @@ export default function SignupScreen({ navigation }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [aviso, setAviso] = useState(null);
     const { register } = useAuth();
+    const { cores, escuro } = useTema();
 
     function abrirPolitica() {
         Linking.openURL('https://kidjourney-3cc97.web.app/politica-de-seguranca').catch(() => {
@@ -47,15 +49,15 @@ export default function SignupScreen({ navigation }) {
     }
 
     return (
-        <ScrollView style={styles.scrollContainer}>
-            <View style={styles.container}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: 'flex-start', marginBottom: 10, backgroundColor: '#BFDE6C60', width: 40, height: 40, borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                    <Ionicons name="arrow-back" size={24} color="#326c00" />
+        <ScrollView style={[styles.scrollContainer, { backgroundColor: cores.fundo }]}>
+            <View style={[styles.container, { backgroundColor: cores.fundo }]}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: 'flex-start', marginBottom: 10, backgroundColor: cores.selecao, width: 40, height: 40, borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                    <Ionicons name="arrow-back" size={24} color={cores.acento} />
                 </TouchableOpacity>
                 <Image source={require('../assets/logo.png')} resizeMode="contain" style={styles.logo} />
                 <View style={styles.form}>
-                    <Text style={styles.titulo}>Cadastro</Text>
-                    <Text style={styles.texto}>Crie sua conta para acessar a plataforma.</Text>
+                    <Text style={[styles.titulo, { color: cores.titulo }]}>Cadastro</Text>
+                    <Text style={[styles.texto, { color: cores.textoSecundario }]}>Crie sua conta para acessar a plataforma.</Text>
                     <Input
                         texto={nome}
                         placeholder="Nome do Responsável"
@@ -87,17 +89,24 @@ export default function SignupScreen({ navigation }) {
                         maxLength={72}
                     />
                     <View style={styles.checkboxContainer}>
-                        <Checkbox value={politica} onValueChange={setPolitica} color={politica ? '#326c00' : undefined} />
-                        <Text style={styles.checkboxLabel}>
+                        <Checkbox value={politica} onValueChange={setPolitica} color={politica ? cores.acento : cores.borda} />
+                        <Text style={[styles.checkboxLabel, { color: cores.textoSecundario }]}>
                             Li e aceito a{' '}
-                            <Text style={styles.link} onPress={abrirPolitica} accessibilityRole="link">
+                            <Text style={[styles.link, { color: cores.acento }]} onPress={abrirPolitica} accessibilityRole="link">
                                 Política de Segurança
                             </Text>
                         </Text>
                     </View>
                     {aviso ? (
-                        <View style={[styles.feedback, aviso.tipo === 'erro' && styles.feedbackErro]}>
-                            <Text style={[styles.feedbackTexto, aviso.tipo === 'erro' && styles.feedbackErroTexto]}>{aviso.texto}</Text>
+                        <View style={[
+                            styles.feedback,
+                            aviso.tipo === 'erro' && styles.feedbackErro,
+                            { backgroundColor: aviso.tipo === 'erro' ? cores.fundoErro : (escuro ? cores.selecao : '#BFDE6C60') },
+                        ]}>
+                            <Text style={[
+                                styles.feedbackTexto,
+                                { color: aviso.tipo === 'erro' ? (escuro ? cores.textoErro : '#8a3b00') : cores.acento },
+                            ]}>{aviso.texto}</Text>
                         </View>
                     ) : null}
                     <BotaoPrincipal
@@ -106,7 +115,7 @@ export default function SignupScreen({ navigation }) {
                         onPress={handleRegister}
                     />
                     <BotaoSecundario texto="Entre na sua Conta" onPress={() => navigation.navigate('Login')} />
-                    <Text style={[styles.texto2, { marginTop: 10 }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
+                    <Text style={[styles.texto2, { marginTop: 10, color: cores.textoSecundario }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
                 </View>
             </View>
         </ScrollView>

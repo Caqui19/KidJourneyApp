@@ -9,6 +9,7 @@ import { Picker } from '@react-native-picker/picker';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from '../auth/AuthContext';
 import { db } from '../config/firebase';
+import { useTema } from '../TemaContext';
 
 const opcoesEspecificidades = [
     'Alergia ao Leite de Vaca (APLV)',
@@ -39,9 +40,11 @@ const opcoesEspecificidades = [
 
 export default function CadastrocriancaScreen({ navigation }) {
     const { user } = useAuth();
+    const { cores, escuro } = useTema();
     const [nome, setNome] = useState('');
     const [value, setValue] = useState('');
     const [dateText, setDateText] = useState('');
+    const [dataNascimento, setDataNascimento] = useState(null);
     const [idadeDetalhada, setIdadeDetalhada] = useState(null);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const showDatePicker = () => setDatePickerVisibility(true);
@@ -70,8 +73,31 @@ export default function CadastrocriancaScreen({ navigation }) {
         return { anos, meses, dias };
     };
 
+    const obterDataMinima = () => {
+        const hoje = new Date();
+        const ano = hoje.getFullYear() - 5;
+        const mes = hoje.getMonth();
+        const dia = Math.min(hoje.getDate(), new Date(ano, mes + 1, 0).getDate());
+        return new Date(ano, mes, dia);
+    };
+
+    const dataForaDoLimite = (data) => {
+        const hoje = new Date();
+        const dataEscolhida = new Date(data.getFullYear(), data.getMonth(), data.getDate());
+        const hojeSemHorario = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+
+        return dataEscolhida < obterDataMinima() || dataEscolhida > hojeSemHorario;
+    };
+
     const handleConfirm = (date) => {
+        if (dataForaDoLimite(date)) {
+            Alert.alert('Idade não permitida', 'A criança deve ter no máximo 5 anos.');
+            hideDatePicker();
+            return;
+        }
+
         const formattedDate = date.toLocaleDateString('pt-BR');
+        setDataNascimento(date);
         setDateText(formattedDate);
         const resultadoIdade = calcularIdadeExata(date);
         setIdadeDetalhada(resultadoIdade);
@@ -99,6 +125,11 @@ export default function CadastrocriancaScreen({ navigation }) {
     async function cadastrarCrianca() {
         if (!nome.trim() || !value || !dateText) {
             Alert.alert('Faltam informações', 'Preencha o nome, sexo e data de nascimento.');
+            return;
+        }
+
+        if (!dataNascimento || dataForaDoLimite(dataNascimento)) {
+            Alert.alert('Idade não permitida', 'A criança deve ter no máximo 5 anos.');
             return;
         }
 
@@ -132,15 +163,15 @@ export default function CadastrocriancaScreen({ navigation }) {
     }
 
     return (
-        <ScrollView style={styles.scrollContainer}>
-            <View style={styles.container}>
+        <ScrollView style={[styles.scrollContainer, { backgroundColor: cores.fundo }]}>
+            <View style={[styles.container, { backgroundColor: cores.fundo }]}>
                 <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', }}>
-                    <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: 'flex-start', marginBottom: 10, backgroundColor: '#BFDE6C60', width: 40, height: 40, borderRadius: 100, justifyContent: 'center', alignItems: 'center' }}>
-                        <Ionicons name="arrow-back" size={24} color="#326c00" />
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: 'flex-start', marginBottom: 10, backgroundColor: cores.selecao, width: 40, height: 40, borderRadius: 100, justifyContent: 'center', alignItems: 'center' }}>
+                        <Ionicons name="arrow-back" size={24} color={cores.acento} />
                     </TouchableOpacity>
-                    <Text style={styles.titulo}>Cadastro Criança</Text>
+                    <Text style={[styles.titulo, { color: cores.titulo }]}>Cadastro Criança</Text>
                 </View>
-                <FontAwesome5 name="baby" size={100} color="#326c00" />
+                <FontAwesome5 name="baby" size={100} color={cores.acento} />
                 <Input
                     texto={nome}
                     placeholder="Nome da Criança"
@@ -151,21 +182,21 @@ export default function CadastrocriancaScreen({ navigation }) {
                 <RadioButton.Group onValueChange={newValue => setValue(newValue)} value={value}>
                     <View style={{ flexDirection: 'row', gap: 50, }}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                            <RadioButton value="masculino" />
-                            <Text style={styles.link}>Masculino</Text>
+                            <RadioButton value="masculino" color={cores.acento} uncheckedColor={cores.textoSecundario} />
+                            <Text style={[styles.link, { color: cores.acento }]}>Masculino</Text>
                         </View>
                         <View style={{ flexDirection: 'row', alignItems: 'center', }}>
-                            <RadioButton value="feminino" />
-                            <Text style={styles.link}>Feminino</Text>
+                            <RadioButton value="feminino" color={cores.acento} uncheckedColor={cores.textoSecundario} />
+                            <Text style={[styles.link, { color: cores.acento }]}>Feminino</Text>
                         </View>
                     </View>
                 </RadioButton.Group>
                 <TouchableOpacity onPress={showDatePicker} style={{ width: '100%', }}>
                     <View pointerEvents="none" style={{ width: '100%', }}>
                         <TextInput
-                            style={styles.input}
+                            style={[styles.input, { color: cores.texto, backgroundColor: cores.campo, borderColor: cores.acento }]}
                             placeholder="Data de Nascimento"
-                            placeholderTextColor="#999"
+                            placeholderTextColor={cores.textoSecundario}
                             value={dateText}
                             editable={false}
                         />
@@ -174,39 +205,41 @@ export default function CadastrocriancaScreen({ navigation }) {
                 <DateTimePickerModal
                     isVisible={isDatePickerVisible}
                     mode="date"
+                    isDarkModeEnabled={escuro}
                     onConfirm={handleConfirm}
                     onCancel={hideDatePicker}
                     confirmTextIOS="Confirmar"
                     cancelTextIOS="Cancelar"
+                    minimumDate={obterDataMinima()}
                     maximumDate={new Date()}
                 />
                 {idadeDetalhada !== null && (
-                    <Text style={styles.resultado}>
-                        A criança tem <Text style={{ fontFamily: 'Poppins_600SemiBold', color: '#326c00' }}>{renderTextoIdade()}</Text>.
+                    <Text style={[styles.resultado, { color: cores.textoSecundario }]}>
+                        A criança tem <Text style={{ fontFamily: 'Poppins_600SemiBold', color: cores.acento }}>{renderTextoIdade()}</Text>.
                     </Text>
                 )}
-                <View style={styles.containerPicker}>
-                    <Picker selectedValue={especificidade} onValueChange={setEspecificidade} style={styles.picker}>
+                <View style={[styles.containerPicker, { borderColor: cores.acento, backgroundColor: cores.campo }]}>
+                    <Picker selectedValue={especificidade} onValueChange={setEspecificidade} style={[styles.picker, { color: cores.texto }]} dropdownIconColor={cores.acento}>
                         <Picker.Item label="Selecione uma especificidade..." value="" enabled={false} />
                         {opcoesEspecificidades.map((opcao) => (
                             <Picker.Item key={opcao} label={opcao} value={opcao} />
                         ))}
                     </Picker>
                 </View>
-                <TouchableOpacity style={styles.addBotao} onPress={adicionarEspecificidade}>
-                    <Text style={styles.addTexto}>Adicionar Especificidade +</Text>
+                <TouchableOpacity style={[styles.addBotao, { backgroundColor: cores.botao, borderColor: cores.acento }]} onPress={adicionarEspecificidade}>
+                    <Text style={[styles.addTexto, { color: cores.textoBotao }]}>Adicionar Especificidade +</Text>
                 </TouchableOpacity>
-                <View style={styles.especificidadesContainer}>
+                <View style={[styles.especificidadesContainer, { borderColor: cores.borda, backgroundColor: cores.cartao }]}>
                     {especificidades.length === 0 ? (
-                        <Text style={[styles.texto2, { textAlign: 'left', }]}>Você não adicionou nenhuma especificidade ainda.</Text>
+                        <Text style={[styles.texto2, { textAlign: 'left', color: cores.textoSecundario }]}>Você não adicionou nenhuma especificidade ainda.</Text>
                     ) : (
                         especificidades.map((item) => (
-                            <Text key={item} style={[styles.texto2, { textAlign: 'left' }]}>{item}</Text>
+                            <Text key={item} style={[styles.texto2, { textAlign: 'left', color: cores.textoSecundario }]}>{item}</Text>
                         ))
                     )}
                 </View>
                 <BotaoPrincipal texto={salvando ? 'Cadastrando...' : 'Cadastrar'} onPress={cadastrarCrianca} disabled={salvando} />
-                <Text style={styles.texto2}>&copy; 2026 KidJourney</Text>
+                <Text style={[styles.texto2, { color: cores.textoSecundario }]}>&copy; 2026 KidJourney</Text>
             </View>
         </ScrollView >
     );

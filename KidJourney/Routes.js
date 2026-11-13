@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { FontAwesome5, Ionicons } from '@expo/vector-icons';
 import { Animated, Image, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useAuth } from './src/auth/AuthContext';
+import { useTema } from './src/TemaContext';
 
 import LoginScreen from './src/screens/Login';
 import SignupScreen from './src/screens/Signup';
@@ -22,6 +23,7 @@ const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
 function SplashScreen() {
+    const { cores } = useTema();
     const ponto1 = useRef(new Animated.Value(0)).current;
     const ponto2 = useRef(new Animated.Value(0)).current;
     const ponto3 = useRef(new Animated.Value(0)).current;
@@ -55,7 +57,7 @@ function SplashScreen() {
     const pontos = [ponto1, ponto2, ponto3];
 
     return (
-        <View style={styles.splash}>
+        <View style={[styles.splash, { backgroundColor: cores.fundo }]}>
             <Image source={require('./src/assets/logo.png')} resizeMode="contain" style={styles.splashLogo} />
             <View style={styles.pontos}>
                 {pontos.map((ponto, index) => (
@@ -75,13 +77,13 @@ function SplashScreen() {
                     />
                 ))}
             </View>
-            <Text style={styles.splashCopyright}>&copy; 2026 KidJourney</Text>
         </View>
     );
 }
 
 function TabRoutes() {
     const [criancaSelecionada, setCriancaSelecionada] = useState(null);
+    const { escuro, cores } = useTema();
 
     return (
         <Tab.Navigator initialRouteName="Home" screenOptions={({ route }) => ({
@@ -114,27 +116,27 @@ function TabRoutes() {
                 }
 
                 return (
-                    <View style={styles.header}>
+                    <View style={[styles.header, { backgroundColor: cores.cabecalho, borderBottomColor: cores.acento }]}>
                         <View style={styles.headerInfo}>
-                            <Text style={styles.headerTitle}>{titulo}</Text>
-                            <Text style={styles.headerSubtitle} numberOfLines={1} ellipsizeMode="tail">
+                            <Text style={[styles.headerTitle, { color: cores.textoCabecalho }]}>{titulo}</Text>
+                            <Text style={[styles.headerSubtitle, { color: cores.textoCabecalho }]} numberOfLines={1} ellipsizeMode="tail">
                                 {subtitulo}
                             </Text>
                         </View>
                         <TouchableOpacity onPress={() => navigation.navigate('Perfil')}>
-                            <Ionicons name="person-circle-outline" size={42} color="#326c00" />
+                            <Ionicons name="person-circle-outline" size={42} color={cores.textoCabecalho} />
                         </TouchableOpacity>
                     </View>
                 );
             },
             tabBarShowLabel: false,
-            tabBarActiveTintColor: '#326c00',
-            tabBarInactiveTintColor: '#326c0090',
+            tabBarActiveTintColor: cores.acento,
+            tabBarInactiveTintColor: escuro ? '#c6e77780' : '#326c0090',
             tabBarStyle: {
-                backgroundColor: '#BFDE6C',
+                backgroundColor: cores.barra,
                 height: 70,
                 borderTopWidth: 1,
-                borderTopColor: '#326c00',
+                borderTopColor: cores.acento,
                 paddingBottom: 10,
                 paddingTop: 10,
                 marginBottom: 40,
@@ -174,9 +176,15 @@ function TabRoutes() {
                     />
                 )}
             </Tab.Screen>
-            <Tab.Screen name="Relatorio" component={RelatorioScreen} />
-            <Tab.Screen name="Home" component={HomeScreen} />
-            <Tab.Screen name="Jornada" component={JornadaScreen} />
+            <Tab.Screen name="Relatorio">
+                {(props) => <RelatorioScreen {...props} criancaSelecionada={criancaSelecionada} />}
+            </Tab.Screen>
+            <Tab.Screen name="Home">
+                {(props) => <HomeScreen {...props} criancaSelecionada={criancaSelecionada} />}
+            </Tab.Screen>
+            <Tab.Screen name="Jornada">
+                {(props) => <JornadaScreen {...props} criancaSelecionada={criancaSelecionada} />}
+            </Tab.Screen>
             <Tab.Screen name="Recomendacoes" component={RecomendacoesScreen} />
             <Tab.Screen name="Anotacoes" component={AnotacoesScreen} />
         </Tab.Navigator>
@@ -185,6 +193,7 @@ function TabRoutes() {
 
 export default function Routes({ fontsLoaded = true }) {
     const { user, isLoading } = useAuth();
+    const { carregandoTema } = useTema();
     const [splashConcluida, setSplashConcluida] = useState(false);
 
     useEffect(() => {
@@ -192,7 +201,7 @@ export default function Routes({ fontsLoaded = true }) {
         return () => clearTimeout(tempo);
     }, []);
 
-    if (!fontsLoaded || isLoading || !splashConcluida) {
+    if (!fontsLoaded || isLoading || carregandoTema || !splashConcluida) {
         return <SplashScreen />;
     }
 
@@ -237,14 +246,6 @@ const styles = StyleSheet.create({
         height: 9,
         borderRadius: 5,
         backgroundColor: '#BFDE6C',
-    },
-
-    splashCopyright: {
-        position: 'absolute',
-        bottom: 20,
-        color: '#636363',
-        fontSize: 12,
-        fontFamily: 'Poppins_400Regular',
     },
 
     header: {

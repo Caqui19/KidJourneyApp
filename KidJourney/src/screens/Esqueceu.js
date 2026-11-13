@@ -6,12 +6,14 @@ import { Input } from '../components/Input';
 import { Ionicons } from '@expo/vector-icons';
 import { useAuth } from '../auth/AuthContext';
 import { mensagemErro } from '../services/auth';
+import { useTema } from '../TemaContext';
 
 export default function EsqueceuScreen({ navigation }) {
     const [email, setEmail] = useState('');
     const [mensagem, setMensagem] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { resetPassword } = useAuth();
+    const { cores, escuro } = useTema();
 
     async function handleResetPassword() {
         if (!email.trim()) {
@@ -37,15 +39,15 @@ export default function EsqueceuScreen({ navigation }) {
     }
 
     return (
-        <ScrollView style={styles.scrollContainer}>
-            <View style={styles.container}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: 'flex-start', marginBottom: 10, backgroundColor: '#BFDE6C60', width: 40, height: 40, borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
-                    <Ionicons name="arrow-back" size={24} color="#326c00" />
+        <ScrollView style={[styles.scrollContainer, { backgroundColor: cores.fundo }]}>
+            <View style={[styles.container, { backgroundColor: cores.fundo }]}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={{ alignSelf: 'flex-start', marginBottom: 10, backgroundColor: cores.selecao, width: 40, height: 40, borderRadius: '100%', justifyContent: 'center', alignItems: 'center' }}>
+                    <Ionicons name="arrow-back" size={24} color={cores.acento} />
                 </TouchableOpacity>
                 <Image source={require('../assets/logo.png')} resizeMode="contain" style={styles.logo} />
                 <View style={styles.form}>
-                    <Text style={styles.titulo}>Esqueceu a Senha?</Text>
-                    <Text style={styles.texto}>Insira seu Email para que possamos enviar a redefinição da senha.</Text>
+                    <Text style={[styles.titulo, { color: cores.titulo }]}>Esqueceu a Senha?</Text>
+                    <Text style={[styles.texto, { color: cores.textoSecundario }]}>Insira seu Email para que possamos enviar a redefinição da senha.</Text>
                     <Input
                         texto={email}
                         placeholder="Endereço de Email"
@@ -57,14 +59,21 @@ export default function EsqueceuScreen({ navigation }) {
                         setTexto={setEmail}
                     />
                     {mensagem ? (
-                        <View style={[styles.feedback, mensagem.tipo === 'erro' && styles.feedbackErro]}>
-                            <Text style={[styles.feedbackTexto, mensagem.tipo === 'erro' && styles.feedbackErroTexto]}>{mensagem.texto}</Text>
+                        <View style={[
+                            styles.feedback,
+                            mensagem.tipo === 'erro' && styles.feedbackErro,
+                            { backgroundColor: mensagem.tipo === 'erro' ? cores.fundoErro : (escuro ? cores.selecao : '#BFDE6C60') },
+                        ]}>
+                            <Text style={[
+                                styles.feedbackTexto,
+                                { color: mensagem.tipo === 'erro' ? (escuro ? cores.textoErro : '#8a3b00') : cores.acento },
+                            ]}>{mensagem.texto}</Text>
                         </View>
                     ) : null}
                     <BotaoPrincipal texto={isSubmitting ? 'Enviando...' : 'Enviar Redefinição'} disabled={isSubmitting} onPress={handleResetPassword} />
-                    <Text style={styles.texto2}>ou</Text>
+                    <Text style={[styles.texto2, { color: cores.textoSecundario }]}>ou</Text>
                     <BotaoSecundario texto="Entre na sua Conta" onPress={() => navigation.navigate('Login')} />
-                    <Text style={[styles.texto2, { marginTop: 10 }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
+                    <Text style={[styles.texto2, { marginTop: 10, color: cores.textoSecundario }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
                 </View>
             </View>
         </ScrollView>

@@ -5,6 +5,7 @@ import { BotaoSecundario } from '../components/Botaosecundario';
 import { Input } from '../components/Input';
 import { useAuth } from '../auth/AuthContext';
 import { mensagemErro } from '../services/auth';
+import { useTema } from '../TemaContext';
 
 export default function LoginScreen({ navigation }) {
     const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ export default function LoginScreen({ navigation }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [mensagem, setMensagem] = useState(null);
     const { login, isLoading } = useAuth();
+    const { cores, escuro } = useTema();
 
     async function handleLogin() {
         if (!email.trim() || !password) {
@@ -32,12 +34,12 @@ export default function LoginScreen({ navigation }) {
     }
 
     return (
-        <ScrollView style={styles.scrollContainer}>
-            <View style={styles.container}>
+        <ScrollView style={[styles.scrollContainer, { backgroundColor: cores.fundo }]}>
+            <View style={[styles.container, { backgroundColor: cores.fundo }]}>
                 <Image source={require('../assets/logo.png')} resizeMode="contain" style={styles.logo} />
                 <View style={styles.form}>
-                    <Text style={styles.titulo}>Login</Text>
-                    <Text style={styles.texto}>Entre na sua conta para acessar a plataforma.</Text>
+                    <Text style={[styles.titulo, { color: cores.titulo }]}>Login</Text>
+                    <Text style={[styles.texto, { color: cores.textoSecundario }]}>Entre na sua conta para acessar a plataforma.</Text>
                     <Input
                         texto={email}
                         placeholder="Endereço de Email"
@@ -59,11 +61,11 @@ export default function LoginScreen({ navigation }) {
                         maxLength={72}
                     />
                     <TouchableOpacity onPress={() => navigation.navigate('Esqueceu')}>
-                        <Text style={styles.link}>Esqueceu a senha?</Text>
+                        <Text style={[styles.link, { color: cores.acento }]}>Esqueceu a senha?</Text>
                     </TouchableOpacity>
                     {mensagem ? (
-                        <View style={[styles.feedback, styles.feedbackErro]}>
-                            <Text style={[styles.feedbackTexto, styles.feedbackErroTexto]}>{mensagem.texto}</Text>
+                        <View style={[styles.feedback, styles.feedbackErro, escuro && { backgroundColor: cores.fundoErro }]}>
+                            <Text style={[styles.feedbackTexto, styles.feedbackErroTexto, escuro && { color: cores.textoErro }]}>{mensagem.texto}</Text>
                         </View>
                     ) : null}
                     <BotaoPrincipal
@@ -73,7 +75,7 @@ export default function LoginScreen({ navigation }) {
                     />
                 </View>
                 <BotaoSecundario texto="Crie uma conta" style={{ marginTop: 20 }} onPress={() => navigation.navigate('Signup')} />
-                <Text style={[styles.texto2, { marginTop: 20 }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
+                <Text style={[styles.texto2, { marginTop: 20, color: cores.textoSecundario }]}>&copy; 2026 KidJourney. Todos os direitos reservados.</Text>
             </View>
         </ScrollView >
     );

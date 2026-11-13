@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTema } from '../TemaContext';
 
 export function Input({
     texto,
@@ -16,17 +17,18 @@ export function Input({
     onSubmitEditing,
 }) {
     const [mostrarSenha, setMostrarSenha] = useState(false);
+    const { cores } = useTema();
 
     const senha = secureTextEntry;
 
     return (
         <View style={styles.container}>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { borderColor: cores.acento, color: cores.texto, backgroundColor: cores.campo }]}
                 value={texto}
                 onChangeText={setTexto}
                 placeholder={placeholder}
-                placeholderTextColor="#999"
+                placeholderTextColor={cores.textoSecundario}
                 secureTextEntry={senha && !mostrarSenha}
                 keyboardType={keyboardType}
                 autoCapitalize={autoCapitalize}
@@ -39,7 +41,7 @@ export function Input({
             />
             {senha && (
                 <TouchableOpacity style={styles.visualizar} onPress={() => setMostrarSenha(!mostrarSenha)}>
-                    <Ionicons name={mostrarSenha ? 'eye' : 'eye-off'} size={25} color="#326c00" />
+                    <Ionicons name={mostrarSenha ? 'eye' : 'eye-off'} size={25} color={cores.acento} />
                 </TouchableOpacity>
             )}
         </View>
