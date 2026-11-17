@@ -39,6 +39,10 @@ export default function HomeScreen({ navigation, criancaSelecionada }) {
                     <FontAwesome5 style={styles.icone} name="baby" size={50} color={cores.acento} solid />
                     <Text style={[styles.textoCard, { color: cores.textoSecundario }]}>Gerencie o progresso de suas crianças, ou crie uma personalização na aba Crianças.</Text>
                 </TouchableOpacity>
+                <TouchableOpacity style={[styles.card, { backgroundColor: cores.cartao, borderColor: cores.borda }]} onPress={() => navigation.navigate('Anotacoes')} activeOpacity={0.8}>
+                    <FontAwesome5 style={styles.icone} name="sticky-note" size={50} color={cores.acento} solid />
+                    <Text style={[styles.textoCard, { color: cores.textoSecundario }]}>Registre observações importantes sobre a rotina da criança e consulte suas anotações quando precisar.</Text>
+                </TouchableOpacity>
             </View>
             <Text style={[styles.texto2, { color: cores.textoSecundario }]}>&copy; 2026 KidJourney</Text>
         </ScrollView>

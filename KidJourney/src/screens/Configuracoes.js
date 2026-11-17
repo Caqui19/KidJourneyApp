@@ -7,7 +7,6 @@ import { useTema } from '../TemaContext';
 export default function ConfiguracoesScreen({ navigation }) {
     const { user, logout, resetPassword } = useAuth();
     const { tema, escuro, cores, alterarTema } = useTema();
-    const [notificacoes, setNotificacoes] = useState('Sim');
     const [isSigningOut, setIsSigningOut] = useState(false);
     const [isSendingReset, setIsSendingReset] = useState(false);
 
@@ -63,10 +62,6 @@ export default function ConfiguracoesScreen({ navigation }) {
                         <Seletor valor={tema} opcoes={['Claro', 'Escuro']} aoSelecionar={alterarTema} cores={cores} escuro={escuro} />
                     </View>
 
-                    <View style={[styles.linha, { borderBottomColor: cores.borda }]}>
-                        <Text style={[styles.textoLinha, { color: cores.texto }]}>Notificações</Text>
-                        <Seletor valor={notificacoes} opcoes={['Sim', 'Não']} aoSelecionar={setNotificacoes} cores={cores} escuro={escuro} />
-                    </View>
 
                     <Documento
                         titulo="Política de Segurança"

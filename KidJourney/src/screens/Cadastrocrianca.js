@@ -12,30 +12,50 @@ import { db } from '../config/firebase';
 import { useTema } from '../TemaContext';
 
 const opcoesEspecificidades = [
-    'Alergia ao Leite de Vaca (APLV)',
-    'Alergia a Ovo',
-    'Alergia a Soja',
-    'Alergia a Trigo',
-    'Alergia a Amendoim / Castanhas',
-    'Alergia a Peixes / Frutos do Mar',
-    'Intolerância a Lactose',
-    'Intolerância a Frutose',
-    'Doença Celíaca (Restrição a Glúten)',
-    'Diabetes Infantil (Tipo 1)',
-    'Refluxo Gastroesofágico',
-    'Constipação Crônica',
-    'Prematuridade (Idade Corrigida)',
-    'Seletividade Alimentar Sensorial (TEA)',
-    'Dificuldade de Foco / Agitação (TDAH)',
-    'Dificuldade de Mastigação',
-    'Dificuldade de Deglutição (Disfagia)',
-    'Reflexo de Gag Sensível',
-    'Fase de Dentição (Nascimento de Dentes)',
-    'Neofobia Alimentar (Rejeição a Novos Alimentos)',
-    'Vegetarianismo',
-    'Veganismo',
-    'Dieta Sem Açúcar',
-    'Introdução Alimentar (Transição para Sólidos)',
+    {
+        categoria: 'Alergias e intolerâncias',
+        itens: [
+            'Alergia à Proteína do Leite de Vaca (APLV)',
+            'Alergia a ovo',
+            'Alergia a soja',
+            'Alergia a trigo',
+            'Alergia a amendoim ou castanhas',
+            'Alergia a peixes ou frutos do mar',
+            'Alergia a outro alimento',
+            'Intolerância à lactose',
+            'Intolerância à frutose',
+            'Doença celíaca',
+        ],
+    },
+    {
+        categoria: 'Condições que podem exigir cuidados alimentares',
+        itens: [
+            'Diabetes tipo 1',
+            'Refluxo gastroesofágico',
+            'Constipação crônica',
+            'Outra condição com dieta orientada por profissional',
+        ],
+    },
+    {
+        categoria: 'Dificuldades e etapas da alimentação',
+        itens: [
+            'Seletividade alimentar',
+            'Neofobia alimentar (recusa de alimentos novos)',
+            'Dificuldade de mastigação',
+            'Dificuldade de deglutição',
+            'Reflexo de gag sensível',
+            'Introdução alimentar',
+            'Dificuldade para comer durante a dentição',
+        ],
+    },
+    {
+        categoria: 'Padrões alimentares',
+        itens: [
+            'Vegetarianismo',
+            'Veganismo',
+            'Evita açúcar adicionado',
+        ],
+    },
 ];
 
 export default function CadastrocriancaScreen({ navigation }) {
@@ -50,6 +70,7 @@ export default function CadastrocriancaScreen({ navigation }) {
     const showDatePicker = () => setDatePickerVisibility(true);
     const hideDatePicker = () => setDatePickerVisibility(false);
     const [especificidade, setEspecificidade] = useState('');
+    const [detalheEspecificidade, setDetalheEspecificidade] = useState('');
     const [especificidades, setEspecificidades] = useState([]);
     const [salvando, setSalvando] = useState(false);
 
@@ -105,9 +126,26 @@ export default function CadastrocriancaScreen({ navigation }) {
     };
 
     function adicionarEspecificidade() {
-        if (!especificidade || especificidades.includes(especificidade)) return;
-        setEspecificidades([...especificidades, especificidade]);
+        if (!especificidade) return;
+
+        const precisaDeDetalhe = [
+            'Alergia a outro alimento',
+            'Outra condição com dieta orientada por profissional',
+        ].includes(especificidade);
+
+        if (precisaDeDetalhe && !detalheEspecificidade.trim()) {
+            Alert.alert('Falta uma informação', 'Descreva o alimento ou a condição.');
+            return;
+        }
+
+        const especificidadeCompleta = detalheEspecificidade.trim()
+            ? `${especificidade}: ${detalheEspecificidade.trim()}`
+            : especificidade;
+
+        if (especificidades.includes(especificidadeCompleta)) return;
+        setEspecificidades([...especificidades, especificidadeCompleta]);
         setEspecificidade('');
+        setDetalheEspecificidade('');
     }
 
     const renderTextoIdade = () => {
@@ -138,9 +176,22 @@ export default function CadastrocriancaScreen({ navigation }) {
             return;
         }
 
+        const precisaDeDetalhe = [
+            'Alergia a outro alimento',
+            'Outra condição com dieta orientada por profissional',
+        ].includes(especificidade);
+
+        if (precisaDeDetalhe && !detalheEspecificidade.trim()) {
+            Alert.alert('Falta uma informação', 'Descreva o alimento ou a condição.');
+            return;
+        }
+
+        const especificidadeCompleta = detalheEspecificidade.trim()
+            ? `${especificidade}: ${detalheEspecificidade.trim()}`
+            : especificidade;
         const listaEspecificidades = [...especificidades];
-        if (especificidade && !listaEspecificidades.includes(especificidade)) {
-            listaEspecificidades.push(especificidade);
+        if (especificidade && !listaEspecificidades.includes(especificidadeCompleta)) {
+            listaEspecificidades.push(especificidadeCompleta);
         }
 
         setSalvando(true);
@@ -219,13 +270,40 @@ export default function CadastrocriancaScreen({ navigation }) {
                     </Text>
                 )}
                 <View style={[styles.containerPicker, { borderColor: cores.acento, backgroundColor: cores.campo }]}>
-                    <Picker selectedValue={especificidade} onValueChange={setEspecificidade} style={[styles.picker, { color: cores.texto }]} dropdownIconColor={cores.acento}>
+                    <Picker
+                        selectedValue={especificidade}
+                        onValueChange={(valor) => {
+                            setEspecificidade(valor);
+                            setDetalheEspecificidade('');
+                        }}
+                        style={[styles.picker, { color: cores.texto }]}
+                        dropdownIconColor={cores.acento}
+                    >
                         <Picker.Item label="Selecione uma especificidade..." value="" enabled={false} />
-                        {opcoesEspecificidades.map((opcao) => (
-                            <Picker.Item key={opcao} label={opcao} value={opcao} />
-                        ))}
+                        {opcoesEspecificidades.flatMap((grupo) => [
+                            <Picker.Item key={grupo.categoria} label={grupo.categoria} value={grupo.categoria} enabled={false} />,
+                            ...grupo.itens.map((opcao) => (
+                                <Picker.Item key={opcao} label={opcao} value={opcao} />
+                            )),
+                        ])}
                     </Picker>
                 </View>
+                {[
+                    'Alergia a outro alimento',
+                    'Intolerância à frutose',
+                    'Outra condição com dieta orientada por profissional',
+                ].includes(especificidade) && (
+                    <Input
+                        texto={detalheEspecificidade}
+                        setTexto={setDetalheEspecificidade}
+                        placeholder={especificidade === 'Alergia a outro alimento'
+                            ? 'Qual alimento causa alergia?'
+                            : especificidade === 'Intolerância à frutose'
+                                ? 'Alimentos orientados para evitar (separe por vírgula)'
+                                : 'Descreva a condição ou orientação'}
+                        maxLength={100}
+                    />
+                )}
                 <TouchableOpacity style={[styles.addBotao, { backgroundColor: cores.botao, borderColor: cores.acento }]} onPress={adicionarEspecificidade}>
                     <Text style={[styles.addTexto, { color: cores.textoBotao }]}>Adicionar Especificidade +</Text>
                 </TouchableOpacity>

@@ -185,7 +185,9 @@ function TabRoutes() {
             <Tab.Screen name="Jornada">
                 {(props) => <JornadaScreen {...props} criancaSelecionada={criancaSelecionada} />}
             </Tab.Screen>
-            <Tab.Screen name="Recomendacoes" component={RecomendacoesScreen} />
+            <Tab.Screen name="Recomendacoes">
+                {(props) => <RecomendacoesScreen {...props} criancaSelecionada={criancaSelecionada} />}
+            </Tab.Screen>
             <Tab.Screen name="Anotacoes" component={AnotacoesScreen} />
         </Tab.Navigator>
     );

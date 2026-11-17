@@ -27,6 +27,7 @@ export async function validarPerfil(usuario) {
             email: usuario.email,
             perfil: 'cliente',
             aprovado: false,
+            premium: false,
         }, { merge: true });
         return usuario;
     }
@@ -67,6 +68,7 @@ export async function cadastrar(nome, email, senha, politicaSegurancaAceita, aoC
             email: conta.user.email,
             perfil: 'cliente',
             aprovado: false,
+            premium: false,
             politicaSegurancaAceita: true,
             aceitoEm: serverTimestamp(),
         });

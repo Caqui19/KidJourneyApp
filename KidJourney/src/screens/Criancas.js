@@ -9,10 +9,12 @@ import { Crianca } from '../components/Crianca';
 import { useAuth } from '../auth/AuthContext';
 import { db } from '../config/firebase';
 import { useTema } from '../TemaContext';
+import { BloqueioPremium } from '../components/BloqueioPremium';
 
 const alimentosBase = [
-    { label: 'Leite materno', valor: 'Leite materno', minimoMeses: 0, leite: true, tags: [] },
-    { label: 'Fórmula infantil indicada para a criança', valor: 'Fórmula infantil indicada para a criança', minimoMeses: 0, maximoMeses: 23, leite: true, tags: [] },
+    { label: 'Leite materno', valor: 'Leite materno', minimoMeses: 0, maximoMeses: 71, leite: true, tags: ['lactose', 'leiteMaterno'] },
+    { label: 'Fórmula infantil com lactose indicada para a criança', valor: 'Fórmula infantil indicada para a criança', minimoMeses: 0, maximoMeses: 23, leite: true, tags: ['lactose', 'leiteVaca', 'animal'] },
+    { label: 'Fórmula infantil sem lactose indicada pelo profissional', valor: 'Fórmula infantil sem lactose indicada pelo profissional', minimoMeses: 0, maximoMeses: 23, leite: true, tags: ['leiteVaca', 'animal', 'semLactose'] },
 
     { label: 'Banana amassada', valor: 'Banana amassada', minimoMeses: 6, maximoMeses: 8, grupo: 'fruta', tags: ['fruta', 'frutose', 'macia'] },
     { label: 'Maçã cozida e amassada', valor: 'Maçã cozida e amassada', minimoMeses: 6, maximoMeses: 8, grupo: 'fruta', tags: ['fruta', 'frutose', 'macia'] },
@@ -68,26 +70,143 @@ const alimentosBase = [
     { label: 'Pão com ovo mexido', valor: 'Pão com ovo mexido', minimoMeses: 36, grupo: 'lanche', tags: ['trigo', 'gluten', 'ovo', 'animal'] },
     { label: 'Iogurte natural com fruta', valor: 'Iogurte natural com fruta', minimoMeses: 36, grupo: 'lanche', tags: ['leiteVaca', 'lactose', 'animal', 'fruta', 'frutose', 'macia'] },
     { label: 'Leite de vaca', valor: 'Leite de vaca', minimoMeses: 36, grupo: 'bebida', tags: ['leiteVaca', 'lactose', 'animal'] },
+    { label: 'Manga madura amassada', valor: 'Manga madura amassada', minimoMeses: 6, maximoMeses: 8, grupo: 'fruta', tags: ['fruta', 'frutose', 'macia'] },
+    { label: 'Melão maduro amassado e sem sementes', valor: 'Melão maduro amassado e sem sementes', minimoMeses: 6, maximoMeses: 8, grupo: 'fruta', tags: ['fruta', 'frutose', 'macia'] },
+    { label: 'Goiaba madura amassada e sem sementes', valor: 'Goiaba madura amassada e sem sementes', minimoMeses: 6, maximoMeses: 8, grupo: 'fruta', tags: ['fruta', 'frutose', 'macia'] },
+    { label: 'Batata-doce bem cozida e amassada', valor: 'Batata-doce bem cozida e amassada', minimoMeses: 6, maximoMeses: 8, grupo: 'raiz', tags: ['macia'] },
+    { label: 'Inhame bem cozido e amassado', valor: 'Inhame bem cozido e amassado', minimoMeses: 6, maximoMeses: 8, grupo: 'raiz', tags: ['macia'] },
+    { label: 'Milho bem cozido e amassado', valor: 'Milho bem cozido e amassado', minimoMeses: 6, maximoMeses: 8, grupo: 'cereal', tags: ['macia'] },
+    { label: 'Chuchu bem cozido e amassado', valor: 'Chuchu bem cozido e amassado', minimoMeses: 6, maximoMeses: 8, grupo: 'vegetal', tags: ['macia'] },
+    { label: 'Brócolis bem cozido e amassado', valor: 'Brócolis bem cozido e amassado', minimoMeses: 6, maximoMeses: 8, grupo: 'vegetal', tags: ['macia'] },
+    { label: 'Feijão-preto bem cozido e amassado', valor: 'Feijão-preto bem cozido e amassado', minimoMeses: 6, maximoMeses: 8, grupo: 'leguminosa', tags: ['macia'] },
+    { label: 'Grão-de-bico bem cozido e amassado', valor: 'Grão-de-bico bem cozido e amassado', minimoMeses: 6, maximoMeses: 8, grupo: 'leguminosa', tags: ['macia'] },
+    { label: 'Carne bovina bem cozida e desfiada', valor: 'Carne bovina bem cozida e desfiada', minimoMeses: 6, maximoMeses: 8, grupo: 'proteina', tags: ['carne', 'animal', 'macia'] },
+    { label: 'Arroz, feijão, abóbora e carne bem cozidos e amassados', valor: 'Arroz, feijão, abóbora e carne bem cozidos e amassados', minimoMeses: 6, maximoMeses: 8, grupo: 'refeicao', tags: ['carne', 'animal', 'macia'] },
+
+    { label: 'Manga madura em pedaços macios', valor: 'Manga madura em pedaços macios', minimoMeses: 9, maximoMeses: 11, grupo: 'fruta', tags: ['fruta', 'frutose', 'macia'] },
+    { label: 'Abacate maduro em pedaços macios', valor: 'Abacate maduro em pedaços macios', minimoMeses: 9, maximoMeses: 11, grupo: 'fruta', tags: ['fruta', 'frutose', 'macia'] },
+    { label: 'Batata-doce cozida em pedaços macios', valor: 'Batata-doce cozida em pedaços macios', minimoMeses: 9, maximoMeses: 11, grupo: 'raiz', tags: ['macia'] },
+    { label: 'Polenta macia', valor: 'Polenta macia', minimoMeses: 9, maximoMeses: 11, grupo: 'cereal', tags: ['macia'] },
+    { label: 'Abobrinha bem cozida em pedaços pequenos', valor: 'Abobrinha bem cozida em pedaços pequenos', minimoMeses: 9, maximoMeses: 11, grupo: 'vegetal', tags: ['macia'] },
+    { label: 'Ervilha bem cozida e amassada', valor: 'Ervilha bem cozida e amassada', minimoMeses: 9, maximoMeses: 11, grupo: 'leguminosa', tags: ['macia'] },
+    { label: 'Carne bovina moída bem cozida', valor: 'Carne bovina moída bem cozida', minimoMeses: 9, maximoMeses: 11, grupo: 'proteina', tags: ['carne', 'animal', 'macia'] },
+    { label: 'Arroz, feijão, frango e cenoura bem cozidos', valor: 'Arroz, feijão, frango e cenoura bem cozidos', minimoMeses: 9, maximoMeses: 11, grupo: 'refeicao', tags: ['carne', 'animal', 'macia'] },
+    { label: 'Lentilha, arroz e espinafre bem cozidos', valor: 'Lentilha, arroz e espinafre bem cozidos', minimoMeses: 9, maximoMeses: 11, grupo: 'refeicao', tags: ['macia'] },
+    { label: 'Ovo bem cozido com batata e legumes', valor: 'Ovo bem cozido com batata e legumes', minimoMeses: 9, maximoMeses: 11, grupo: 'refeicao', tags: ['ovo', 'animal', 'macia'] },
+
+    { label: 'Cuscuz de milho com ovo bem cozido', valor: 'Cuscuz de milho com ovo bem cozido', minimoMeses: 12, maximoMeses: 23, grupo: 'refeicao', tags: ['ovo', 'animal', 'macia'] },
+    { label: 'Tapioca com frango desfiado', valor: 'Tapioca com frango desfiado', minimoMeses: 12, maximoMeses: 23, grupo: 'lanche', tags: ['carne', 'animal', 'macia'] },
+    { label: 'Panqueca de banana e ovo', valor: 'Panqueca de banana e ovo', minimoMeses: 12, maximoMeses: 23, grupo: 'lanche', tags: ['fruta', 'frutose', 'ovo', 'animal', 'macia'] },
+    { label: 'Sopa de legumes, feijão e carne desfiada', valor: 'Sopa de legumes, feijão e carne desfiada', minimoMeses: 12, maximoMeses: 23, grupo: 'refeicao', tags: ['carne', 'animal', 'macia'] },
+    { label: 'Arroz integral, feijão e legumes cozidos', valor: 'Arroz integral, feijão e legumes cozidos', minimoMeses: 12, maximoMeses: 23, grupo: 'refeicao', tags: ['macia'] },
+    { label: 'Quinoa com frango e legumes', valor: 'Quinoa com frango e legumes', minimoMeses: 12, maximoMeses: 23, grupo: 'refeicao', tags: ['carne', 'animal', 'macia'] },
+    { label: 'Mandioca cozida com carne desfiada', valor: 'Mandioca cozida com carne desfiada', minimoMeses: 12, maximoMeses: 23, grupo: 'refeicao', tags: ['carne', 'animal', 'macia'] },
+    { label: 'Salmão bem cozido e desfiado com legumes', valor: 'Salmão bem cozido e desfiado com legumes', minimoMeses: 12, maximoMeses: 23, grupo: 'refeicao', tags: ['peixe', 'animal', 'macia'] },
+    { label: 'Iogurte natural sem lactose indicado pelo profissional', valor: 'Iogurte natural sem lactose indicado pelo profissional', minimoMeses: 12, grupo: 'laticinio', tags: ['leiteVaca', 'animal', 'semLactose', 'macia'] },
+    { label: 'Leite sem lactose indicado pelo profissional', valor: 'Leite sem lactose indicado pelo profissional', minimoMeses: 12, grupo: 'leite', leite: true, tags: ['leiteVaca', 'animal', 'semLactose'] },
+
+    { label: 'Cuscuz de milho com ovo mexido', valor: 'Cuscuz de milho com ovo mexido', minimoMeses: 24, maximoMeses: 35, grupo: 'refeicao', tags: ['ovo', 'animal'] },
+    { label: 'Purê de batata-doce com frango desfiado', valor: 'Purê de batata-doce com frango desfiado', minimoMeses: 24, maximoMeses: 35, grupo: 'refeicao', tags: ['carne', 'animal', 'macia'] },
+    { label: 'Polenta com lentilha e legumes', valor: 'Polenta com lentilha e legumes', minimoMeses: 24, maximoMeses: 35, grupo: 'refeicao', tags: ['macia'] },
+    { label: 'Arroz, feijão, carne moída e abobrinha', valor: 'Arroz, feijão, carne moída e abobrinha', minimoMeses: 24, maximoMeses: 35, grupo: 'refeicao', tags: ['carne', 'animal', 'macia'] },
+    { label: 'Peixe bem cozido com purê de mandioquinha', valor: 'Peixe bem cozido com purê de mandioquinha', minimoMeses: 24, maximoMeses: 35, grupo: 'refeicao', tags: ['peixe', 'animal', 'macia'] },
+    { label: 'Salada de frutas picadas', valor: 'Salada de frutas picadas', minimoMeses: 24, maximoMeses: 35, grupo: 'fruta', tags: ['fruta', 'frutose'] },
+    { label: 'Pão caseiro com ovo mexido', valor: 'Pão caseiro com ovo mexido', minimoMeses: 24, maximoMeses: 35, grupo: 'lanche', tags: ['trigo', 'gluten', 'ovo', 'animal'] },
+    { label: 'Arroz, feijão, tofu e legumes', valor: 'Arroz, feijão, tofu e legumes', minimoMeses: 24, maximoMeses: 35, grupo: 'refeicao', tags: ['soja', 'macia'] },
+
+    { label: 'Omelete com tomate e espinafre', valor: 'Omelete com tomate e espinafre', minimoMeses: 36, maximoMeses: 71, grupo: 'refeicao', tags: ['ovo', 'animal'] },
+    { label: 'Cuscuz de milho com frango e legumes', valor: 'Cuscuz de milho com frango e legumes', minimoMeses: 36, maximoMeses: 71, grupo: 'refeicao', tags: ['carne', 'animal'] },
+    { label: 'Pão integral com ovo mexido', valor: 'Pão integral com ovo mexido', minimoMeses: 36, maximoMeses: 71, grupo: 'lanche', tags: ['trigo', 'gluten', 'ovo', 'animal'] },
+    { label: 'Tapioca com queijo branco', valor: 'Tapioca com queijo branco', minimoMeses: 36, maximoMeses: 71, grupo: 'lanche', tags: ['leiteVaca', 'lactose', 'animal'] },
+    { label: 'Aveia cozida com banana', valor: 'Aveia cozida com banana', minimoMeses: 36, maximoMeses: 71, grupo: 'lanche', tags: ['fruta', 'frutose', 'macia'] },
+    { label: 'Arroz, feijão, carne suína e legumes', valor: 'Arroz, feijão, carne suína e legumes', minimoMeses: 36, maximoMeses: 71, grupo: 'refeicao', tags: ['carne', 'animal'] },
+    { label: 'Peixe bem cozido com arroz e vegetais', valor: 'Peixe bem cozido com arroz e vegetais', minimoMeses: 36, maximoMeses: 71, grupo: 'refeicao', tags: ['peixe', 'animal'] },
+    { label: 'Salada de frutas da estação', valor: 'Salada de frutas da estação', minimoMeses: 36, maximoMeses: 71, grupo: 'fruta', tags: ['fruta', 'frutose'] },
+    { label: 'Pasta de amendoim sem açúcar bem diluída', valor: 'Pasta de amendoim sem açúcar bem diluída', minimoMeses: 6, maximoMeses: 8, grupo: 'proteina', tags: ['amendoim', 'macia'] },
+    { label: 'Pasta de castanha sem açúcar bem diluída', valor: 'Pasta de castanha sem açúcar bem diluída', minimoMeses: 6, maximoMeses: 8, grupo: 'proteina', tags: ['castanhas', 'macia'] },
+    { label: 'Pasta de amendoim misturada à fruta', valor: 'Pasta de amendoim misturada à fruta', minimoMeses: 9, maximoMeses: 11, grupo: 'lanche', tags: ['amendoim', 'fruta', 'frutose', 'macia'] },
+    { label: 'Pasta de castanha misturada à fruta', valor: 'Pasta de castanha misturada à fruta', minimoMeses: 9, maximoMeses: 11, grupo: 'lanche', tags: ['castanhas', 'fruta', 'frutose', 'macia'] },
+    { label: 'Pasta lisa de amendoim em camada fina', valor: 'Pasta lisa de amendoim em camada fina', minimoMeses: 12, maximoMeses: 71, grupo: 'proteina', tags: ['amendoim'] },
+    { label: 'Pasta lisa de castanhas em camada fina', valor: 'Pasta lisa de castanhas em camada fina', minimoMeses: 12, maximoMeses: 71, grupo: 'proteina', tags: ['castanhas'] },
+    { label: 'Camarão bem cozido e picado com arroz e legumes', valor: 'Camarão bem cozido e picado com arroz e legumes', minimoMeses: 36, maximoMeses: 71, grupo: 'refeicao', tags: ['frutosMar', 'animal'] },
+
 ];
 
+function adicionarTagsDeIdade(alimento) {
+    const maximoMeses = alimento.maximoMeses === undefined ? 71 : alimento.maximoMeses;
+
+    if (alimento.minimoMeses === 0 && maximoMeses === 71) {
+        alimento.faixaEtaria = '0 a 5 anos';
+    } else if (alimento.minimoMeses === 0) {
+        alimento.faixaEtaria = '0 a ' + maximoMeses + ' meses';
+    } else if (maximoMeses === 71) {
+        alimento.faixaEtaria = alimento.minimoMeses + ' meses a 5 anos';
+    } else {
+        alimento.faixaEtaria = alimento.minimoMeses + ' a ' + maximoMeses + ' meses';
+    }
+
+    const tagIdade = normalizarTexto(alimento.faixaEtaria).replace(/ /g, '_');
+    if (!alimento.tags.includes(tagIdade)) alimento.tags.push(tagIdade);
+    if (!alimento.tags.includes('semAcucarAdicionado')) {
+        alimento.tags.push('semAcucarAdicionado');
+    }
+    return alimento;
+}
+
+alimentosBase.forEach(adicionarTagsDeIdade);
+
+function normalizarTexto(texto) {
+    return String(texto)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
 const filtrosDeAlimentos = {
-    'Alergia ao Leite de Vaca (APLV)': ['leiteVaca'],
-    'Alergia a Ovo': ['ovo'],
-    'Alergia a Soja': ['soja'],
-    'Alergia a Trigo': ['trigo', 'gluten'],
-    'Alergia a Amendoim / Castanhas': ['amendoim', 'castanhas'],
-    'Alergia a Peixes / Frutos do Mar': ['peixe', 'frutosMar'],
-    'Intolerância a Lactose': ['lactose'],
-    'Intolerância a Frutose': ['frutose'],
-    'Doença Celíaca (Restrição a Glúten)': ['gluten'],
-    'Vegetarianismo': ['carne', 'peixe', 'frutosMar'],
-    'Veganismo': ['animal'],
-    'Dificuldade de Mastigação': ['texturaDura'],
-    'Dificuldade de Deglutição (Disfagia)': ['texturaDura'],
-    'Reflexo de Gag Sensível': ['texturaDura'],
-    'Fase de Dentição (Nascimento de Dentes)': ['texturaDura'],
-    'Introdução Alimentar (Transição para Sólidos)': ['texturaDura'],
+    [normalizarTexto('Alergia à Proteína do Leite de Vaca (APLV)')]: ['leiteVaca'],
+    [normalizarTexto('Alergia ao Leite de Vaca (APLV)')]: ['leiteVaca'],
+    [normalizarTexto('Alergia a ovo')]: ['ovo'],
+    [normalizarTexto('Alergia a soja')]: ['soja'],
+    [normalizarTexto('Alergia a trigo')]: ['trigo'],
+    [normalizarTexto('Alergia a amendoim ou castanhas')]: ['amendoim', 'castanhas'],
+    [normalizarTexto('Alergia a Amendoim / Castanhas')]: ['amendoim', 'castanhas'],
+    [normalizarTexto('Alergia a peixes ou frutos do mar')]: ['peixe', 'frutosMar'],
+    [normalizarTexto('Alergia a Peixes / Frutos do Mar')]: ['peixe', 'frutosMar'],
+    [normalizarTexto('Intolerância à lactose')]: ['lactose'],
+    [normalizarTexto('Doença celíaca')]: ['gluten'],
+    [normalizarTexto('Doença Celíaca (Restrição a Glúten)')]: ['gluten'],
+    [normalizarTexto('Vegetarianismo')]: ['carne', 'peixe', 'frutosMar'],
+    [normalizarTexto('Veganismo')]: ['animal'],
+    [normalizarTexto('Evita açúcar adicionado')]: ['acucarAdicionado'],
+    [normalizarTexto('Dieta Sem Açúcar')]: ['acucarAdicionado'],
 };
+
+const especificidadesComTexturaMacia = [
+    'dificuldade de mastigacao',
+    'reflexo de gag sensivel',
+    'introducao alimentar',
+    'dificuldade para comer durante a denticao',
+    'fase de denticao (nascimento de dentes)',
+    'introducao alimentar (transicao para solidos)',
+];
+
+const especificidadesComAlimentosParaEvitar = [
+    'alergia a outro alimento',
+    'intolerancia a frutose',
+];
+
+const tagsDeAlimentosInformados = [
+    { nomes: ['leite', 'leite de vaca', 'leite bovino', 'iogurte', 'queijo'], tags: ['leiteVaca'] },
+    { nomes: ['ovo'], tags: ['ovo'] },
+    { nomes: ['soja', 'tofu'], tags: ['soja'] },
+    { nomes: ['trigo', 'gluten'], tags: ['trigo', 'gluten'] },
+    { nomes: ['amendoim'], tags: ['amendoim'] },
+    { nomes: ['castanha'], tags: ['castanhas'] },
+    { nomes: ['peixe', 'salmao'], tags: ['peixe'] },
+    { nomes: ['frutos do mar', 'camarao', 'marisco'], tags: ['frutosMar'] },
+];
+
 
 function idadeEmMeses(dataNascimento, hoje) {
     if (typeof dataNascimento !== 'string') return null;
@@ -112,31 +231,52 @@ function idadeEmMeses(dataNascimento, hoje) {
     return meses;
 }
 
-function alimentosPermitidos(especificidades = [], mesesDeIdade = null) {
+export function alimentosPermitidos(especificidades = [], mesesDeIdade = null) {
     const bloqueios = new Set();
-    const precisaDeTexturaMacia = especificidades.some((especificidade) => [
-        'Dificuldade de Mastigação',
-        'Dificuldade de Deglutição (Disfagia)',
-        'Reflexo de Gag Sensível',
-        'Fase de Dentição (Nascimento de Dentes)',
-        'Introdução Alimentar (Transição para Sólidos)',
-    ].includes(especificidade));
+    const precisaDeTexturaMacia = especificidades.some((especificidade) => (
+        especificidadesComTexturaMacia.includes(normalizarTexto(especificidade.split(':')[0]))
+    ));
+    const alimentosParaEvitar = [];
 
     especificidades.forEach((especificidade) => {
-        (filtrosDeAlimentos[especificidade] || []).forEach((tag) => bloqueios.add(tag));
+        const partes = especificidade.split(':');
+        const nome = normalizarTexto(partes[0]);
+        const detalhes = partes.slice(1).join(':');
+
+        (filtrosDeAlimentos[nome] || []).forEach((tag) => bloqueios.add(tag));
+
+        if (especificidadesComAlimentosParaEvitar.includes(nome)) {
+            detalhes.split(',').forEach((item) => {
+                const alimentoInformado = normalizarTexto(item);
+                if (!alimentoInformado) return;
+
+                let encontrouTag = false;
+                tagsDeAlimentosInformados.forEach((grupo) => {
+                    if (grupo.nomes.some((nome) => alimentoInformado.includes(normalizarTexto(nome)))) {
+                        grupo.tags.forEach((tag) => bloqueios.add(tag));
+                        encontrouTag = true;
+                    }
+                });
+
+                if (!encontrouTag) alimentosParaEvitar.push(alimentoInformado);
+            });
+        }
     });
 
     return alimentosBase.filter((alimento) => (
         (mesesDeIdade === null
             ? alimento.leite === true
             : mesesDeIdade >= alimento.minimoMeses
+                && mesesDeIdade <= 71
                 && (alimento.maximoMeses === undefined || mesesDeIdade <= alimento.maximoMeses))
-        && !alimento.tags.some((tag) => bloqueios.has(tag))
-        && (!precisaDeTexturaMacia || alimento.tags.includes('macia') || [
-            'Leite materno',
-            'Fórmula infantil indicada para a criança',
-        ].includes(alimento.valor))
-        && (mesesDeIdade === null || mesesDeIdade >= 12 || !alimento.tags.includes('leiteVaca'))
+        && (
+            !alimento.tags.some((tag) => bloqueios.has(tag))
+            || (alimento.valor === 'Leite materno' && bloqueios.has('lactose'))
+        )
+        && !alimentosParaEvitar.some((item) => normalizarTexto(
+            `${alimento.label} ${alimento.valor} ${alimento.tags.join(' ')}`
+        ).includes(item))
+        && (!precisaDeTexturaMacia || alimento.tags.includes('macia') || alimento.leite)
     ));
 }
 
@@ -266,6 +406,10 @@ export default function CriancasScreen({ navigation, criancaSelecionada, aoSelec
             <GerenciarCrianca
                 crianca={criancaGerenciada}
                 diaAtual={diaAtual}
+                selecionada={criancaSelecionada?.id === criancaGerenciada.id}
+                aoSelecionar={() => aoSelecionarCrianca(
+                    criancaSelecionada?.id === criancaGerenciada.id ? null : criancaGerenciada
+                )}
                 voltar={() => setCriancaGerenciada(null)}
                 aoDeletar={() => deletarCrianca(criancaGerenciada)}
             />
@@ -301,11 +445,11 @@ export default function CriancasScreen({ navigation, criancaSelecionada, aoSelec
     );
 }
 
-function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
-    const { user } = useAuth();
+function GerenciarCrianca({ crianca, diaAtual, selecionada, aoSelecionar, voltar, aoDeletar }) {
+    const { user, premium } = useAuth();
     const { cores, escuro } = useTema();
     const [registros, setRegistros] = useState([]);
-    const [carregandoRegistros, setCarregandoRegistros] = useState(true);
+    const [carregandoRegistros, setCarregandoRegistros] = useState(false);
     const [mostrarEspecificidades, setMostrarEspecificidades] = useState(false);
     const [mostrarModalDeletar, setMostrarModalDeletar] = useState(false);
     const [mostrarModalAlimentacao, setMostrarModalAlimentacao] = useState(false);
@@ -326,11 +470,7 @@ function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
     const dia = chaveDoDia(new Date());
 
     useEffect(() => {
-        if (!user?.uid) {
-            setRegistros([]);
-            setCarregandoRegistros(false);
-            return;
-        }
+        if (!user?.uid || !premium) return;
 
         setRegistros([]);
         setCarregandoRegistros(true);
@@ -347,10 +487,10 @@ function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
             Alert.alert('Não foi possível carregar', 'Confira as regras do Firestore e tente novamente.');
             setCarregandoRegistros(false);
         });
-    }, [user?.uid, crianca.id, dia]);
+    }, [user?.uid, premium, crianca.id, dia]);
 
     async function salvarRegistro(dados) {
-        if (!user?.uid) return;
+        if (!user?.uid || !premium) return;
 
         setSalvando(true);
         try {
@@ -399,6 +539,8 @@ function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
     }
 
     async function deletarRegistro(registro) {
+        if (!premium || !user?.uid) return;
+
         try {
             await deleteDoc(doc(db, 'usuarios', user.uid, 'criancas', crianca.id, 'registros', registro.id));
         } catch {
@@ -413,6 +555,8 @@ function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
     }
 
     function abrirAlimentacao() {
+        if (!premium) return;
+
         if (alimentos.length === 0) {
             Alert.alert('Sem opções disponíveis', 'Não há opções nesta lista para as especificidades e a idade cadastradas.');
             return;
@@ -425,14 +569,16 @@ function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
     }
 
     function abrirSono() {
+        if (!premium) return;
+
         setEventoSono('Acordou');
         setHoraSelecionada(new Date());
         setMostrarModalSono(true);
     }
 
     const dataExibida = formatarData(new Date());
-    const eventosAlimentacao = registros.filter((registro) => registro.tipo === 'alimentacao');
-    const eventosSono = registros.filter((registro) => registro.tipo === 'sono');
+    const eventosAlimentacao = premium ? registros.filter((registro) => registro.tipo === 'alimentacao') : [];
+    const eventosSono = premium ? registros.filter((registro) => registro.tipo === 'sono') : [];
 
     return (
         <ScrollView style={[styles.scrollContainer, { backgroundColor: cores.fundo }]} contentContainerStyle={styles.detalheContainer}>
@@ -494,7 +640,7 @@ function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
                 </View>
             </Modal>
 
-            <Modal visible={mostrarModalAlimentacao} transparent animationType="fade" onRequestClose={() => setMostrarModalAlimentacao(false)}>
+            <Modal visible={premium && mostrarModalAlimentacao} transparent animationType="fade" onRequestClose={() => setMostrarModalAlimentacao(false)}>
                 <View style={[styles.popupFundo, escuro && styles.popupFundoEscuro]}>
                     <TouchableOpacity style={StyleSheet.absoluteFillObject} onPress={() => setMostrarModalAlimentacao(false)} disabled={salvando} />
                     <View style={[styles.popupEspecificidades, { backgroundColor: cores.cartao, borderColor: cores.borda }]}>
@@ -542,7 +688,7 @@ function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
                 </View>
             </Modal>
 
-            <Modal visible={mostrarModalSono} transparent animationType="fade" onRequestClose={() => setMostrarModalSono(false)}>
+            <Modal visible={premium && mostrarModalSono} transparent animationType="fade" onRequestClose={() => setMostrarModalSono(false)}>
                 <View style={[styles.popupFundo, escuro && styles.popupFundoEscuro]}>
                     <TouchableOpacity style={StyleSheet.absoluteFillObject} onPress={() => setMostrarModalSono(false)} disabled={salvando} />
                     <View style={[styles.popupEspecificidades, { backgroundColor: cores.cartao, borderColor: cores.borda }]}>
@@ -579,7 +725,7 @@ function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
             </Modal>
 
             <DateTimePickerModal
-                isVisible={mostrarHora}
+                isVisible={premium && mostrarHora}
                 mode="time"
                 date={horaSelecionada}
                 isDarkModeEnabled={escuro}
@@ -593,59 +739,88 @@ function GerenciarCrianca({ crianca, diaAtual, voltar, aoDeletar }) {
                 onCancel={() => setMostrarHora(false)}
             />
 
-            <Text style={[styles.textoData, { color: cores.textoSecundario }]}>{dataExibida}</Text>
-            <Text style={[styles.tituloSecao, { color: cores.titulo }]}>Alimentação</Text>
-            <View style={[styles.cardRegistros, { backgroundColor: cores.cartao, borderColor: cores.borda }]}>
-                <View style={styles.topoCardRegistros}>
-                    <FontAwesome5 name="utensils" size={21} color={cores.acento} solid />
-                    <TouchableOpacity style={[styles.botaoRotina, { backgroundColor: cores.botao, borderColor: cores.acento }]} onPress={abrirAlimentacao}>
-                        <Ionicons name="add" size={24} color={cores.acento} />
-                        <Text style={[styles.textoBotao, { color: cores.textoBotao }]}>Registrar alimento</Text>
-                    </TouchableOpacity>
-                </View>
-                {carregandoRegistros ? (
-                    <Text style={[styles.texto, { color: cores.textoSecundario }]}>Carregando registros...</Text>
-                ) : eventosAlimentacao.length === 0 ? (
-                    <Text style={[styles.texto, { color: cores.textoSecundario }]}>Ainda não há alimentos registrados hoje.</Text>
-                ) : eventosAlimentacao.map((registro) => (
-                    <View key={registro.id} style={[styles.linhaRegistro, { borderBottomColor: cores.borda }]}>
-                        <Text style={[styles.textoRegistro, { color: cores.textoSecundario }]}>
-                            {registro.horario} · {registro.refeicao ? `${registro.refeicao}: ` : ''}{registro.alimento}
-                        </Text>
-                        <TouchableOpacity onPress={() => deletarRegistro(registro)} accessibilityLabel="Excluir registro">
-                            <Ionicons name="trash" size={20} color={cores.perigo} />
-                        </TouchableOpacity>
+            {premium ? (
+                <>
+                    <Text style={[styles.textoData, { color: cores.textoSecundario }]}>{dataExibida}</Text>
+                    <Text style={[styles.tituloSecao, { color: cores.titulo }]}>Alimentação</Text>
+                    <View style={[styles.cardRegistros, { backgroundColor: cores.cartao, borderColor: cores.borda }]}>
+                        <View style={styles.topoCardRegistros}>
+                            <FontAwesome5 name="utensils" size={21} color={cores.acento} solid />
+                            <TouchableOpacity style={[styles.botaoRotina, { backgroundColor: cores.botao, borderColor: cores.acento }]} onPress={abrirAlimentacao}>
+                                <Ionicons name="add" size={24} color={cores.acento} />
+                                <Text style={[styles.textoBotao, { color: cores.textoBotao }]}>Registrar alimento</Text>
+                            </TouchableOpacity>
+                        </View>
+                        {carregandoRegistros ? (
+                            <Text style={[styles.texto, { color: cores.textoSecundario }]}>Carregando registros...</Text>
+                        ) : eventosAlimentacao.length === 0 ? (
+                            <Text style={[styles.texto, { color: cores.textoSecundario }]}>Ainda não há alimentos registrados hoje.</Text>
+                        ) : eventosAlimentacao.map((registro) => (
+                            <View key={registro.id} style={[styles.linhaRegistro, { borderBottomColor: cores.borda }]}>
+                                <Text style={[styles.textoRegistro, { color: cores.textoSecundario }]}>
+                                    {registro.horario} · {registro.refeicao ? `${registro.refeicao}: ` : ''}{registro.alimento}
+                                </Text>
+                                <TouchableOpacity onPress={() => deletarRegistro(registro)} accessibilityLabel="Excluir registro">
+                                    <Ionicons name="trash" size={20} color={cores.perigo} />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
                     </View>
-                ))}
-            </View>
 
-            <Text style={[styles.tituloSecao, { color: cores.titulo }]}>Sono</Text>
-            <View style={[styles.cardRegistros, { backgroundColor: cores.cartao, borderColor: cores.borda }]}>
-                <View style={styles.topoCardRegistros}>
-                    <FontAwesome5 name="bed" size={22} color={cores.acento} solid />
-                    <TouchableOpacity style={[styles.botaoRotina, { backgroundColor: cores.botao, borderColor: cores.acento }]} onPress={abrirSono}>
-                        <Ionicons name="add" size={24} color={cores.acento} />
-                        <Text style={[styles.textoBotao, { color: cores.textoBotao }]}>Registrar sono</Text>
-                    </TouchableOpacity>
-                </View>
-                {carregandoRegistros ? (
-                    <Text style={[styles.texto, { color: cores.textoSecundario }]}>Carregando registros...</Text>
-                ) : eventosSono.length === 0 ? (
-                    <Text style={[styles.texto, { color: cores.textoSecundario }]}>Ainda não há horários de sono registrados hoje.</Text>
-                ) : eventosSono.map((registro) => (
-                    <View key={registro.id} style={[styles.linhaRegistro, { borderBottomColor: cores.borda }]}>
-                        <Text style={[styles.textoRegistro, { color: cores.textoSecundario }]}>{registro.horario} · {registro.evento}</Text>
-                        <TouchableOpacity onPress={() => deletarRegistro(registro)} accessibilityLabel="Excluir registro">
-                            <Ionicons name="trash" size={20} color={cores.perigo} />
-                        </TouchableOpacity>
+                    <Text style={[styles.tituloSecao, { color: cores.titulo }]}>Sono</Text>
+                    <View style={[styles.cardRegistros, { backgroundColor: cores.cartao, borderColor: cores.borda }]}>
+                        <View style={styles.topoCardRegistros}>
+                            <FontAwesome5 name="bed" size={22} color={cores.acento} solid />
+                            <TouchableOpacity style={[styles.botaoRotina, { backgroundColor: cores.botao, borderColor: cores.acento }]} onPress={abrirSono}>
+                                <Ionicons name="add" size={24} color={cores.acento} />
+                                <Text style={[styles.textoBotao, { color: cores.textoBotao }]}>Registrar sono</Text>
+                            </TouchableOpacity>
+                        </View>
+                        {carregandoRegistros ? (
+                            <Text style={[styles.texto, { color: cores.textoSecundario }]}>Carregando registros...</Text>
+                        ) : eventosSono.length === 0 ? (
+                            <Text style={[styles.texto, { color: cores.textoSecundario }]}>Ainda não há horários de sono registrados hoje.</Text>
+                        ) : eventosSono.map((registro) => (
+                            <View key={registro.id} style={[styles.linhaRegistro, { borderBottomColor: cores.borda }]}>
+                                <Text style={[styles.textoRegistro, { color: cores.textoSecundario }]}>{registro.horario} · {registro.evento}</Text>
+                                <TouchableOpacity onPress={() => deletarRegistro(registro)} accessibilityLabel="Excluir registro">
+                                    <Ionicons name="trash" size={20} color={cores.perigo} />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
                     </View>
-                ))}
-            </View>
+
+                </>
+            ) : (
+                <View style={{ gap: 20 }}>
+                    <BloqueioPremium
+                        titulo="Alimentação Premium bloqueada"
+                        texto="Registre refeições e acompanhe alimentos e horários adequados à idade e às especificidades da criança."
+                    />
+                    <BloqueioPremium
+                        titulo="Sono Premium bloqueado"
+                        texto="Registre os horários de sono e acompanhe a rotina da criança ao longo do dia."
+                    />
+                </View>
+            )}
 
             <View style={[styles.separadorExcluir, { borderTopColor: cores.borda }]} />
-            <TouchableOpacity style={[styles.botaoExcluir, { borderColor: cores.perigo, backgroundColor: cores.cartao }]} onPress={() => setMostrarModalDeletar(true)}>
-                <Text style={[styles.textoExcluir, { color: cores.perigo }]}>Deletar Criança</Text>
-            </TouchableOpacity>
+            <View style={styles.acoesCrianca}>
+                <TouchableOpacity
+                    style={[styles.botaoSelecionar, { borderColor: cores.acento, backgroundColor: cores.botao }]}
+                    onPress={aoSelecionar}
+                >
+                    <Text style={[styles.textoSelecionar, { color: cores.textoBotao }]}>
+                        {selecionada ? 'Desselecionar' : 'Selecionar'}
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.botaoExcluir, { borderColor: cores.perigo, backgroundColor: cores.cartao }]}
+                    onPress={() => setMostrarModalDeletar(true)}
+                >
+                    <Text style={[styles.textoExcluir, { color: cores.perigo }]}>Deletar Criança</Text>
+                </TouchableOpacity>
+            </View>
             <Text style={[styles.texto2, styles.copyrightDetalhe, { color: cores.textoSecundario }]}>&copy; 2026 KidJourney</Text>
         </ScrollView>
     );
@@ -685,14 +860,14 @@ const styles = StyleSheet.create({
     },
 
     copyrightDetalhe: {
-        marginTop: 12,
+        marginTop: 0,
     },
 
     detalheContainer: {
         paddingHorizontal: 14,
         paddingTop: 16,
         paddingBottom: 20,
-        gap: 8,
+        gap: 20,
     },
 
     dadosCrianca: {
@@ -856,13 +1031,6 @@ const styles = StyleSheet.create({
         fontSize: 15,
         fontFamily: 'Poppins_400Regular',
         lineHeight: 24,
-    },
-
-    textoOrientacao: {
-        color: '#636363',
-        fontSize: 12,
-        fontFamily: 'Poppins_400Regular',
-        lineHeight: 18,
     },
 
     botoesPopup: {
@@ -1041,6 +1209,23 @@ const styles = StyleSheet.create({
         fontFamily: 'Poppins_600SemiBold',
     },
 
+    acoesCrianca: {
+        width: '100%',
+        gap: 10,
+    },
+
+    botaoSelecionar: {
+        alignItems: 'center',
+        borderWidth: 1,
+        borderRadius: 24,
+        paddingVertical: 10,
+    },
+
+    textoSelecionar: {
+        fontSize: 15,
+        fontFamily: 'Poppins_600SemiBold',
+    },
+
     botaoExcluir: {
         alignItems: 'center',
         borderWidth: 1,
@@ -1054,8 +1239,8 @@ const styles = StyleSheet.create({
         width: '100%',
         borderTopWidth: 1,
         borderTopColor: '#ccc',
-        marginTop: 12,
-        paddingTop: 12,
+        marginTop: 0,
+        paddingTop: 0,
     },
 
     textoExcluir: {

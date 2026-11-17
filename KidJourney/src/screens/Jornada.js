@@ -126,6 +126,77 @@ function idadeEmMeses(dataNascimento, hoje) {
     return meses;
 }
 
+function normalizarTexto(texto) {
+    return String(texto)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .trim();
+}
+
+function obterOrientacoes(especificidades = []) {
+    const nomes = especificidades.map((item) => normalizarTexto(item.split(':')[0]));
+    const orientacoes = [];
+    const temRestricao = nomes.some((nome) => (
+        nome.startsWith('alergia a ')
+        || nome === 'intolerancia a lactose'
+        || nome === 'intolerancia a frutose'
+        || nome === 'doenca celiaca'
+        || nome === 'vegetarianismo'
+        || nome === 'veganismo'
+    ));
+
+    if (temRestricao) {
+        orientacoes.push('As opções são filtradas pelas informações cadastradas. Confira ingredientes e preparo, pois o app não verifica marcas ou contato entre alimentos.');
+    }
+
+    if (nomes.includes('alergia a outro alimento')) {
+        orientacoes.push('O filtro usa o alimento informado nos detalhes da alergia.');
+    }
+
+    if (nomes.includes('intolerancia a frutose')) {
+        const temAlimentosInformados = especificidades.some((item) => (
+            normalizarTexto(item.split(':')[0]) === 'intolerancia a frutose'
+            && item.split(':').slice(1).join(':').trim()
+        ));
+        orientacoes.push(temAlimentosInformados
+            ? 'Na intolerância à frutose, o filtro considera somente os alimentos informados no cadastro.'
+            : 'Informe nos detalhes quais alimentos devem ser filtrados por orientação individual.');
+    }
+
+    if (nomes.includes('evita acucar adicionado')) {
+        orientacoes.push('Confira os rótulos: o app não analisa o açúcar adicionado de produtos de marcas específicas.');
+    }
+
+    if (nomes.some((nome) => [
+        'dificuldade de mastigacao',
+        'reflexo de gag sensivel',
+        'introducao alimentar',
+        'dificuldade para comer durante a denticao',
+    ].includes(nome))) {
+        orientacoes.push('O registro de alimentos prioriza opções descritas como macias; confira se a consistência é adequada para a criança.');
+    }
+
+    if (nomes.includes('dificuldade de degluticao')) {
+        orientacoes.push('O app não define a consistência segura para dificuldade de deglutição. Siga a orientação individual da criança.');
+    }
+
+    if (nomes.includes('seletividade alimentar') || nomes.includes('neofobia alimentar (recusa de alimentos novos)')) {
+        orientacoes.push('Use os registros para acompanhar o que a criança comeu; essas especificidades não ocultam opções.');
+    }
+
+    if (nomes.some((nome) => [
+        'diabetes tipo 1',
+        'refluxo gastroesofagico',
+        'constipacao cronica',
+        'outra condicao com dieta orientada por profissional',
+    ].includes(nome))) {
+        orientacoes.push('Para as condições cadastradas, siga a orientação alimentar individual da criança.');
+    }
+
+    return [...new Set(orientacoes)];
+}
+
 function ListaRecomendacoes({ itens, cores }) {
     return (
         <View style={styles.lista}>
@@ -146,6 +217,7 @@ export default function JornadaScreen({ criancaSelecionada }) {
     const faseAtual = meses === null
         ? -1
         : fases.findIndex((fase) => meses >= fase.minimo && meses <= fase.maximo);
+    const orientacoesEspecificidades = obterOrientacoes(criancaSelecionada?.especificidades || []);
     const [faseAberta, setFaseAberta] = useState(faseAtual);
     const titulo = criancaSelecionada?.nome
         ? `Jornada de ${criancaSelecionada.nome}`
@@ -210,6 +282,15 @@ export default function JornadaScreen({ criancaSelecionada }) {
                                         <Text style={[styles.nomeSecao, { color: cores.titulo }]}>Alimentação</Text>
                                     </View>
                                     <ListaRecomendacoes itens={fase.alimentacao} cores={cores} />
+                                    {selecionada && orientacoesEspecificidades.length > 0 && (
+                                        <View style={styles.secao}>
+                                            <View style={styles.tituloSecao}>
+                                                <Ionicons name="alert-circle-outline" size={19} color={cores.acento} />
+                                                <Text style={[styles.nomeSecao, { color: cores.titulo }]}>Considerando o cadastro</Text>
+                                            </View>
+                                            <ListaRecomendacoes itens={orientacoesEspecificidades} cores={cores} />
+                                        </View>
+                                    )}
                                 </View>
 
                                 <View style={styles.secao}>
